@@ -426,7 +426,7 @@
     <div style="display: flex; align-items: center; gap: 16px;">
       <div style="text-align: right; font-size: 14px;">
         <div style="font-weight: 600;">👨‍🏫 <span id="guruName">Guru PJOK</span></div>
-        <div style="font-size: 12px; opacity: 0.9;">SMK Cokroaminoto 2 Banjarnegara</div>
+        <div style="font-size: 12px; opacity: 0.9;">SMPN 1 Bojonegoro</div>
       </div>
       <button class="btn-secondary" onclick="window.location.href='guru.html'" style="padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; color: white;">
         ← Kembali
@@ -453,22 +453,16 @@
     </div>
   </div>
   
-  <!-- TODAY'S SCHEDULE -->
+  <!-- WEEKLY SCHEDULE -->
   <div class="schedule-card">
-    <h2>🗓️ Jadwal Hari Ini</h2>
+    <h2>🗓️ Jadwal Minggu Ini</h2>
     <div class="class-schedule" id="scheduleList">
-      <div class="schedule-item active" onclick="selectClass('7A')">
-        <div><strong>Kelas 7A</strong></div>
-        <div class="schedule-time">07:00 - 08:30</div>
+      <div style="text-align: center; padding: 40px; color: white; opacity: 0.8;">
+        ⏳ Loading jadwal...
       </div>
-      <div class="schedule-item" onclick="selectClass('7B')">
-        <div><strong>Kelas 7B</strong></div>
-        <div class="schedule-time">08:30 - 10:00</div>
-      </div>
-      <div class="schedule-item" onclick="selectClass('8A')">
-        <div><strong>Kelas 8A</strong></div>
-        <div class="schedule-time">10:15 - 11:45</div>
-      </div>
+    </div>
+    <div style="margin-top: 12px; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; color: white; font-size: 12px;">
+      <strong>📍 Hari ini:</strong> <span id="todayInfo">-</span>
     </div>
   </div>
   
@@ -502,54 +496,15 @@
   
   <!-- TAB CONTENT: INPUT -->
   <div id="tabInput" class="tab-content">
-    <div class="student-list">
-      <div class="student-item" onclick="openMeasurementModal('Andi Pratama', 1, '7A')">
-        <div class="student-info">
-          <div class="student-number">1</div>
-          <div>
-            <div class="student-name">Andi Pratama</div>
-            <div style="font-size: 13px; color: #7f8c8d;">Kelas 7A • Terakhir: 2 Jan 2026</div>
-          </div>
-        </div>
-        <div class="student-status">
-          <span class="status-badge status-measured">✓ Minggu ini</span>
-          <button class="btn-measure" onclick="event.stopPropagation(); openMeasurementModal('Andi Pratama', 1, '7A')">
-            📏 Ukur
-          </button>
-        </div>
+    <div style="background: white; padding: 24px; border-radius: 12px; margin-bottom: 16px;">
+      <p style="color: #2c3e50; font-weight: 600; margin-bottom: 12px;">📋 Pilih Kelas untuk Hari Ini:</p>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;" id="todayClassesContainer">
+        <div style="color: #7f8c8d; padding: 12px;">⏳ Loading kelas untuk hari ini...</div>
       </div>
-      
-      <div class="student-item" onclick="openMeasurementModal('Budi Santoso', 2, '7A')">
-        <div class="student-info">
-          <div class="student-number">2</div>
-          <div>
-            <div class="student-name">Budi Santoso</div>
-            <div style="font-size: 13px; color: #7f8c8d;">Kelas 7A • Terakhir: -</div>
-          </div>
-        </div>
-        <div class="student-status">
-          <span class="status-badge status-pending">⏳ Belum diukur</span>
-          <button class="btn-measure" onclick="event.stopPropagation(); openMeasurementModal('Budi Santoso', 2, '7A')">
-            📏 Ukur
-          </button>
-        </div>
-      </div>
-      
-      <!-- More students... -->
-      <div class="student-item" onclick="openMeasurementModal('Citra Dewi', 3, '7A')">
-        <div class="student-info">
-          <div class="student-number">3</div>
-          <div>
-            <div class="student-name">Citra Dewi</div>
-            <div style="font-size: 13px; color: #7f8c8d;">Kelas 7A • Terakhir: -</div>
-          </div>
-        </div>
-        <div class="student-status">
-          <span class="status-badge status-pending">⏳ Belum diukur</span>
-          <button class="btn-measure" onclick="event.stopPropagation(); openMeasurementModal('Citra Dewi', 3, '7A')">
-            📏 Ukur
-          </button>
-        </div>
+    </div>
+    <div class="student-list" id="studentListContainer">
+      <div style="padding: 24px; text-align: center; color: #7f8c8d;">
+        ⏳ Pilih kelas untuk melihat daftar siswa
       </div>
     </div>
   </div>
@@ -925,9 +880,16 @@ let currentStudent = {
   class: ''
 };
 
-let currentClass = '7A';
+let currentClass = null;
 let currentWeek = 1;
 let currentMonth = '2026-01';
+let allSchedules = [];
+let allStudents = [];
+let todaySchedules = [];
+
+// Day mapping
+const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const dayNamesIndo = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
 // Initialize
 window.addEventListener('DOMContentLoaded', () => {
@@ -936,48 +898,199 @@ window.addEventListener('DOMContentLoaded', () => {
   const dateStr = today.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   document.getElementById('currentDate').textContent = dateStr;
   
-  // Load default data
-  loadWeekData();
+  // Load data
+  loadSchedulesAndStudents();
 });
 
-// Date & Class Selection
-function selectClass(className) {
+async function loadSchedulesAndStudents() {
+  try {
+    // Fetch schedules
+    const scheduleResponse = await fetch(CONFIG.APPS_SCRIPT_URL + '?action=getSchedules');
+    const scheduleData = await scheduleResponse.json();
+    
+    if (scheduleData.success) {
+      allSchedules = scheduleData.data || [];
+    } else {
+      loadMockSchedules();
+    }
+    
+    // Fetch students
+    const studentResponse = await fetch(CONFIG.APPS_SCRIPT_URL + '?action=getStudents');
+    const studentData = await studentResponse.json();
+    
+    if (studentData.success) {
+      allStudents = studentData.data || [];
+    } else {
+      loadMockStudents();
+    }
+    
+  } catch (error) {
+    console.log('Using mock data');
+    loadMockSchedules();
+    loadMockStudents();
+  }
+  
+  renderSchedules();
+  loadTodayClasses();
+}
+
+function loadMockSchedules() {
+  allSchedules = [
+    { classID: '1', className: '7A', dayOfWeek: 'Monday', startTime: '07:00', endTime: '08:30', teacher: 'Budi Santoso' },
+    { classID: '2', className: '7B', dayOfWeek: 'Monday', startTime: '08:30', endTime: '10:00', teacher: 'Siti Nurhaliza' },
+    { classID: '3', className: '8A', dayOfWeek: 'Tuesday', startTime: '10:15', endTime: '11:45', teacher: 'Budi Santoso' },
+    { classID: '4', className: '7A', dayOfWeek: 'Wednesday', startTime: '07:00', endTime: '08:30', teacher: 'Budi Santoso' },
+    { classID: '5', className: '8B', dayOfWeek: 'Friday', startTime: '09:00', endTime: '10:30', teacher: 'Siti Nurhaliza' }
+  ];
+}
+
+function loadMockStudents() {
+  allStudents = [
+    { studentID: '1', studentName: 'Andi Pratama', className: '7A', number: 1 },
+    { studentID: '2', studentName: 'Budi Santoso', className: '7A', number: 2 },
+    { studentID: '3', studentName: 'Citra Dewi', className: '7A', number: 3 },
+    { studentID: '4', studentName: 'Doni Setiawan', className: '7B', number: 1 },
+    { studentID: '5', studentName: 'Eka Putri', className: '7B', number: 2 },
+    { studentID: '6', studentName: 'Fajar Rahman', className: '8A', number: 1 },
+    { studentID: '7', studentName: 'Gita Sari', className: '8A', number: 2 }
+  ];
+}
+
+function renderSchedules() {
+  const container = document.getElementById('scheduleList');
+  
+  if (allSchedules.length === 0) {
+    container.innerHTML = '<div style="text-align: center; padding: 40px; color: white; opacity: 0.8;">Tidak ada jadwal</div>';
+    return;
+  }
+  
+  // Group by day
+  const days = {};
+  allSchedules.forEach(schedule => {
+    const day = schedule.dayOfWeek;
+    if (!days[day]) days[day] = [];
+    days[day].push(schedule);
+  });
+  
+  // Sort by day order
+  const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const sortedDays = Object.keys(days).sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
+  
+  let html = '';
+  sortedDays.forEach(day => {
+    const dayIndex = dayOrder.indexOf(day);
+    const dayNameIndo = dayNamesIndo[dayOrder.indexOf(day) + 1] || dayNamesIndo[0];
+    
+    html += `<div style="background: rgba(255,255,255,0.15); padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+      <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px; opacity: 0.9;">${dayNameIndo}</div>`;
+    
+    days[day].forEach(schedule => {
+      html += `
+        <div class="schedule-item" onclick="selectClass('${schedule.className}', '${schedule.classID}')">
+          <div><strong>${schedule.className}</strong></div>
+          <div class="schedule-time">${schedule.startTime} - ${schedule.endTime}</div>
+          <div style="font-size: 11px; opacity: 0.8; margin-top: 4px;">👨‍🏫 ${schedule.teacher}</div>
+        </div>`;
+    });
+    
+    html += '</div>';
+  });
+  
+  container.innerHTML = html;
+}
+
+function loadTodayClasses() {
+  const today = new Date();
+  const todayDayName = dayNames[today.getDay()];
+  const todayDayNameIndo = dayNamesIndo[today.getDay()];
+  
+  // Update today info
+  document.getElementById('todayInfo').textContent = todayDayNameIndo;
+  
+  // Filter classes for today
+  todaySchedules = allSchedules.filter(s => s.dayOfWeek === todayDayName);
+  
+  // Render today's classes
+  const container = document.getElementById('todayClassesContainer');
+  
+  if (todaySchedules.length === 0) {
+    container.innerHTML = '<div style="color: #7f8c8d;">Tidak ada jadwal untuk hari ini</div>';
+    return;
+  }
+  
+  let html = '';
+  todaySchedules.forEach((schedule, index) => {
+    const isActive = index === 0;
+    html += `
+      <button style="padding: 10px 16px; background: ${isActive ? '#27ae60' : 'white'}; color: ${isActive ? 'white' : '#2c3e50'}; border: 2px solid #27ae60; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.3s;" onclick="selectClass('${schedule.className}', '${schedule.classID}')">
+        <strong>${schedule.className}</strong><br/>
+        <span style="font-size: 12px;">${schedule.startTime} - ${schedule.endTime}</span>
+      </button>`;
+  });
+  
+  container.innerHTML = html;
+  
+  // Auto-select first class
+  if (todaySchedules.length > 0) {
+    selectClass(todaySchedules[0].className, todaySchedules[0].classID);
+  }
+}
+
+function selectClass(className, classID) {
   currentClass = className;
   
-  // Update active state
-  document.querySelectorAll('.schedule-item').forEach(item => {
-    item.classList.remove('active');
+  // Update button active state
+  document.querySelectorAll('#todayClassesContainer button').forEach(btn => {
+    btn.style.background = btn.textContent.includes(className) ? '#27ae60' : 'white';
+    btn.style.color = btn.textContent.includes(className) ? 'white' : '#2c3e50';
   });
-  event.target.closest('.schedule-item').classList.add('active');
   
-  // Reload student list for this class
+  // Load students for this class
   loadStudentList(className);
 }
 
-function loadWeekData() {
-  currentWeek = document.getElementById('weekSelect').value;
-  console.log('Loading week:', currentWeek);
-  // Load measurements for this week
-}
-
-function loadMonthData() {
-  currentMonth = document.getElementById('monthSelect').value;
-  console.log('Loading month:', currentMonth);
-  // Load monthly data
-}
-
 function loadStudentList(className) {
-  // In production, fetch from Google Sheets
-  console.log('Loading students for class:', className);
+  // Filter students by class
+  const classStudents = allStudents.filter(s => s.className === className);
+  
+  const container = document.getElementById('studentListContainer');
+  
+  if (classStudents.length === 0) {
+    container.innerHTML = '<div style="padding: 24px; text-align: center; color: #7f8c8d;">Tidak ada siswa di kelas ini</div>';
+    return;
+  }
+  
+  let html = '';
+  classStudents.forEach(student => {
+    html += `
+      <div class="student-item" onclick="openMeasurementModal('${student.studentName}', ${student.number}, '${student.className}')">
+        <div class="student-info">
+          <div class="student-number">${student.number}</div>
+          <div>
+            <div class="student-name">${student.studentName}</div>
+            <div style="font-size: 13px; color: #7f8c8d;">Kelas ${student.className}</div>
+          </div>
+        </div>
+        <div class="student-status">
+          <span class="status-badge status-pending">⏳ Belum diukur</span>
+          <button class="btn-measure" onclick="event.stopPropagation(); openMeasurementModal('${student.studentName}', ${student.number}, '${student.className}')">
+            📏 Ukur
+          </button>
+        </div>
+      </div>`;
+  });
+  
+  container.innerHTML = html;
   updateStats();
 }
 
 function updateStats() {
-  // Update statistics (mock data)
-  document.getElementById('statTotal').textContent = '32';
-  document.getElementById('statMeasured').textContent = '12';
-  document.getElementById('statPending').textContent = '20';
-  document.getElementById('statProgress').textContent = '38%';
+  // Update statistics
+  const classStudents = allStudents.filter(s => s.className === currentClass);
+  document.getElementById('statTotal').textContent = classStudents.length;
+  document.getElementById('statMeasured').textContent = '0';
+  document.getElementById('statPending').textContent = classStudents.length;
+  document.getElementById('statProgress').textContent = '0%';
 }
 
 // Tabs
@@ -1017,7 +1130,6 @@ function closeModal() {
 function loadPreviousData(name, className) {
   // In production, fetch from Google Sheets
   console.log('Loading previous data for:', name, className);
-  // Populate form with previous values if available
 }
 
 function resetForm() {
@@ -1059,7 +1171,6 @@ function calculateBMI() {
 
 // Save Measurement
 async function saveMeasurement() {
-  // Validate required fields
   const beratBadan = document.getElementById('beratBadan').value;
   const tinggiBadan = document.getElementById('tinggiBadan').value;
   
@@ -1068,7 +1179,6 @@ async function saveMeasurement() {
     return;
   }
   
-  // Collect all data
   const measurementData = {
     type: 'fitnessMeasurement',
     studentName: currentStudent.name,
@@ -1078,40 +1188,32 @@ async function saveMeasurement() {
     month: currentMonth,
     date: new Date().toISOString(),
     
-    // Body composition
     beratBadan: parseFloat(beratBadan) || null,
     tinggiBadan: parseFloat(document.getElementById('tinggiBadan').value) || null,
     bmi: parseFloat(document.getElementById('bmi').value) || null,
     heartRate: parseInt(document.getElementById('heartRate').value) || null,
     
-    // Cardio
     run1600: document.getElementById('run1600').value || null,
     run12min: parseInt(document.getElementById('run12min').value) || null,
     
-    // Strength
     pushup: parseInt(document.getElementById('pushup').value) || null,
     situp: parseInt(document.getElementById('situp').value) || null,
     longJump: parseInt(document.getElementById('longJump').value) || null,
     
-    // Speed & Agility
     sprint20: parseFloat(document.getElementById('sprint20').value) || null,
     shuttleRun: parseFloat(document.getElementById('shuttleRun').value) || null,
     
-    // Flexibility
     sitReach: parseInt(document.getElementById('sitReach').value) || null,
     balance: parseInt(document.getElementById('balance').value) || null,
     
-    // Notes
     catatan: document.getElementById('catatanGuru').value || '',
     goal: document.getElementById('goalNext').value || ''
   };
   
   try {
-    // Show loading
     event.target.disabled = true;
     event.target.innerHTML = '⏳ Menyimpan...';
     
-    // Save to Google Sheets
     const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
@@ -1140,7 +1242,6 @@ function exportReport() {
   alert('📤 Exporting ke PDF...\n\nLaporan akan diunduh dalam format PDF.');
 }
 
-  
 // Close modal when clicking outside
 window.onclick = function(event) {
   const modal = document.getElementById('measurementModal');
@@ -1149,6 +1250,9 @@ window.onclick = function(event) {
   }
 }
 </script>
+
+</body>
+</html>
 
 </body>
 </html>
