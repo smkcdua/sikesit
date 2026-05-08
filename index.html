@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Pemantauan Fisik - Portal Guru PJOK</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2c3e50">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #ecf0f1;
+      min-height: 100vh;
+    }
+    
+    /* HEADER */
+    .header {
+      background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+      color: white;
+      padding: 20px 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 {
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    /* MAIN CONTENT */
+    .main-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    
+    /* DATE SELECTOR */
+    .date-selector {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 24px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .date-selector select,
+    .date-selector input {
+      padding: 10px 16px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .date-selector select:focus,
+    .date-selector input:focus {
+      outline: none;
+      border-color: #27ae60;
+    }
+    .date-info {
+      flex: 1;
+      text-align: right;
+      color: #7f8c8d;
+      font-size: 14px;
+    }
+    
+    /* SCHEDULE CARD */
+    .schedule-card {
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+      color: white;
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+    .schedule-card h2 {
+      font-size: 20px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .class-schedule {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .schedule-item {
+      background: rgba(255,255,255,0.2);
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .schedule-item:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+    .schedule-item.active {
+      background: white;
+      color: #2980b9;
+      font-weight: 600;
+    }
+    .schedule-time {
+      font-size: 12px;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+    
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+    .tab {
+      padding: 12px 24px;
+      background: white;
+      border: none;
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+      font-weight: 600;
+      color: #7f8c8d;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+    .tab:hover {
+      color: #27ae60;
+    }
+    .tab.active {
+      background: #27ae60;
+      color: white;
+    }
+    
+    /* STUDENT LIST */
+    .student-list {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .student-item {
+      border-bottom: 1px solid #ecf0f1;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .student-item:hover {
+      background: #f8f9fa;
+    }
+    .student-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .student-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #27ae60;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    .student-name {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    .student-status {
+      display: flex;
+      gap: 8px;
+    }
+    .status-badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status-measured {
+      background: #d1e7dd;
+      color: #0f5132;
+    }
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .btn-measure {
+      padding: 8px 16px;
+      background: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .btn-measure:hover {
+      background: #229954;
+      transform: translateY(-2px);
+    }
+    
+    /* MEASUREMENT MODAL */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      overflow-y: auto;
+    }
+    .modal.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      max-width: 900px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .modal-header {
+      background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+      color: white;
+      padding: 24px;
+      border-radius: 16px 16px 0 0;
+    }
+    .modal-header h2 {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    .modal-body {
+      padding: 24px;
+    }
+    
+    /* MEASUREMENT FORM */
+    .measurement-section {
+      margin-bottom: 24px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #27ae60;
+    }
+    .measurement-section h3 {
+      color: #27ae60;
+      margin-bottom: 16px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .measurement-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .measurement-field {
+      display: flex;
+      flex-direction: column;
+    }
+    .measurement-field label {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 6px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .measurement-field input {
+      padding: 10px 12px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .measurement-field input:focus {
+      outline: none;
+      border-color: #27ae60;
+    }
+    .unit {
+      color: #7f8c8d;
+      font-size: 12px;
+    }
+    .help-text {
+      font-size: 12px;
+      color: #7f8c8d;
+      margin-top: 4px;
+    }
+    
+    /* PREVIOUS DATA */
+    .previous-data {
+      background: #e8f4f8;
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 8px;
+      font-size: 13px;
+    }
+    .previous-data strong {
+      color: #084298;
+    }
+    .trend {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 8px;
+      font-weight: 600;
+    }
+    .trend.up {
+      color: #27ae60;
+    }
+    .trend.down {
+      color: #e74c3c;
+    }
+    .trend.same {
+      color: #7f8c8d;
+    }
+    
+    /* BUTTONS */
+    .modal-footer {
+      padding: 20px 24px;
+      border-top: 1px solid #ecf0f1;
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .btn-primary {
+      background: #27ae60;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #229954;
+    }
+    .btn-secondary {
+      background: #95a5a6;
+      color: white;
+    }
+    .btn-secondary:hover {
+      background: #7f8c8d;
+    }
+    
+    /* STATS CARDS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .stat-card h4 {
+      font-size: 12px;
+      color: #7f8c8d;
+      margin-bottom: 8px;
+    }
+    .stat-card .number {
+      font-size: 28px;
+      font-weight: bold;
+      color: #27ae60;
+    }
+    
+    /* REPORT SECTION */
+    .report-preview {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 24px;
+      border: 2px dashed #ddd;
+    }
+    .report-preview h3 {
+      color: #2c3e50;
+      margin-bottom: 16px;
+    }
+    .progress-chart {
+      background: #f8f9fa;
+      padding: 16px;
+      border-radius: 8px;
+      margin: 16px 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-content">
+    <h1>💪 Pemantauan Fisik Siswa</h1>
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <div style="text-align: right; font-size: 14px;">
+        <div style="font-weight: 600;">👨‍🏫 <span id="guruName">Guru PJOK</span></div>
+        <div style="font-size: 12px; opacity: 0.9;">SMPN 1 Bojonegoro</div>
+      </div>
+      <button class="btn-secondary" onclick="window.location.href='guru.html'" style="padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; color: white;">
+        ← Kembali
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+  
+  <!-- DATE SELECTOR -->
+  <div class="date-selector">
+    <div style="font-weight: 600; color: #2c3e50;">📅 Pilih Periode:</div>
+    <select id="weekSelect" onchange="loadWeekData()">
+      <option value="1">Minggu 1</option>
+      <option value="2">Minggu 2</option>
+      <option value="3">Minggu 3</option>
+      <option value="4">Minggu 4</option>
+    </select>
+    <input type="month" id="monthSelect" onchange="loadMonthData()" value="2026-01">
+    <div class="date-info">
+      <strong id="currentDate">Jumat, 9 Januari 2026</strong>
+    </div>
+  </div>
+  
+  <!-- TODAY'S SCHEDULE -->
+  <div class="schedule-card">
+    <h2>🗓️ Jadwal Hari Ini</h2>
+    <div class="class-schedule" id="scheduleList">
+      <div class="schedule-item active" onclick="selectClass('7A')">
+        <div><strong>Kelas 7A</strong></div>
+        <div class="schedule-time">07:00 - 08:30</div>
+      </div>
+      <div class="schedule-item" onclick="selectClass('7B')">
+        <div><strong>Kelas 7B</strong></div>
+        <div class="schedule-time">08:30 - 10:00</div>
+      </div>
+      <div class="schedule-item" onclick="selectClass('8A')">
+        <div><strong>Kelas 8A</strong></div>
+        <div class="schedule-time">10:15 - 11:45</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <h4>Total Siswa</h4>
+      <div class="number" id="statTotal">32</div>
+    </div>
+    <div class="stat-card">
+      <h4>Sudah Diukur</h4>
+      <div class="number" id="statMeasured" style="color: #27ae60;">12</div>
+    </div>
+    <div class="stat-card">
+      <h4>Belum Diukur</h4>
+      <div class="number" id="statPending" style="color: #f39c12;">20</div>
+    </div>
+    <div class="stat-card">
+      <h4>Progress</h4>
+      <div class="number" id="statProgress" style="color: #3498db;">38%</div>
+    </div>
+  </div>
+  
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('input')">📝 Input Pengukuran</button>
+    <button class="tab" onclick="showTab('progress')">📊 Perkembangan</button>
+    <button class="tab" onclick="showTab('report')">📄 Laporan</button>
+    <button class="tab" onclick="showTab('guide')">📚 Panduan</button>
+  </div>
+  
+  <!-- TAB CONTENT: INPUT -->
+  <div id="tabInput" class="tab-content">
+    <div class="student-list">
+      <div class="student-item" onclick="openMeasurementModal('Andi Pratama', 1, '7A')">
+        <div class="student-info">
+          <div class="student-number">1</div>
+          <div>
+            <div class="student-name">Andi Pratama</div>
+            <div style="font-size: 13px; color: #7f8c8d;">Kelas 7A • Terakhir: 2 Jan 2026</div>
+          </div>
+        </div>
+        <div class="student-status">
+          <span class="status-badge status-measured">✓ Minggu ini</span>
+          <button class="btn-measure" onclick="event.stopPropagation(); openMeasurementModal('Andi Pratama', 1, '7A')">
+            📏 Ukur
+          </button>
+        </div>
+      </div>
+      
+      <div class="student-item" onclick="openMeasurementModal('Budi Santoso', 2, '7A')">
+        <div class="student-info">
+          <div class="student-number">2</div>
+          <div>
+            <div class="student-name">Budi Santoso</div>
+            <div style="font-size: 13px; color: #7f8c8d;">Kelas 7A • Terakhir: -</div>
+          </div>
+        </div>
+        <div class="student-status">
+          <span class="status-badge status-pending">⏳ Belum diukur</span>
+          <button class="btn-measure" onclick="event.stopPropagation(); openMeasurementModal('Budi Santoso', 2, '7A')">
+            📏 Ukur
+          </button>
+        </div>
+      </div>
+      
+      <!-- More students... -->
+      <div class="student-item" onclick="openMeasurementModal('Citra Dewi', 3, '7A')">
+        <div class="student-info">
+          <div class="student-number">3</div>
+          <div>
+            <div class="student-name">Citra Dewi</div>
+            <div style="font-size: 13px; color: #7f8c8d;">Kelas 7A • Terakhir: -</div>
+          </div>
+        </div>
+        <div class="student-status">
+          <span class="status-badge status-pending">⏳ Belum diukur</span>
+          <button class="btn-measure" onclick="event.stopPropagation(); openMeasurementModal('Citra Dewi', 3, '7A')">
+            📏 Ukur
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- TAB CONTENT: PROGRESS (Hidden by default) -->
+  <div id="tabProgress" class="tab-content" style="display: none;">
+    <div style="background: white; padding: 24px; border-radius: 12px;">
+      <h3>📊 Grafik Perkembangan Kelas 7A</h3>
+      <p style="color: #7f8c8d; margin: 16px 0;">Pilih siswa untuk melihat detail perkembangan individu</p>
+      <div style="padding: 40px; text-align: center; background: #f8f9fa; border-radius: 8px;">
+        <div style="font-size: 48px; margin-bottom: 16px;">📈</div>
+        <p style="color: #7f8c8d;">Grafik perkembangan akan ditampilkan di sini</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- TAB CONTENT: REPORT (Hidden by default) -->
+  <div id="tabReport" class="tab-content" style="display: none;">
+    <div style="background: white; padding: 24px; border-radius: 12px;">
+      <h3>📄 Laporan Mingguan</h3>
+      <div style="margin: 16px 0; display: flex; gap: 12px;">
+        <button class="btn btn-primary" onclick="generateReport()">📥 Generate Laporan</button>
+        <button class="btn btn-secondary" onclick="exportReport()">📤 Export PDF</button>
+      </div>
+      <div class="report-preview">
+        <p style="text-align: center; color: #7f8c8d;">Laporan akan ditampilkan di sini setelah generate</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- TAB CONTENT: GUIDE (Hidden by default) -->
+  <div id="tabGuide" class="tab-content" style="display: none;">
+    <div style="background: white; padding: 24px; border-radius: 12px;">
+      <h3>📚 Panduan Pengukuran Fisik</h3>
+      
+      <div class="measurement-section">
+        <h3>🏃 1. KARDIO / DAYA TAHAN</h3>
+        <div style="line-height: 1.8; color: #2c3e50;">
+          <p><strong>1.600m Run (1 Mile):</strong></p>
+          <ul style="margin-left: 20px;">
+            <li>Siswa berlari 4 putaran lapangan 400m atau 1.600m</li>
+            <li>Catat waktu dalam format menit:detik (contoh: 8:30)</li>
+            <li>Target: <12 menit (putra), <14 menit (putri)</li>
+          </ul>
+          <br>
+          <p><strong>12-Minute Run (Cooper Test):</strong></p>
+          <ul style="margin-left: 20px;">
+            <li>Siswa berlari sejauh mungkin dalam 12 menit</li>
+            <li>Catat jarak dalam meter</li>
+            <li>Target: >2000m (putra), >1800m (putri)</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="measurement-section">
+        <h3>💪 2. KEKUATAN & DAYA TAHAN OTOT</h3>
+        <div style="line-height: 1.8; color: #2c3e50;">
+          <p><strong>Push-up (1 menit):</strong></p>
+          <ul style="margin-left: 20px;">
+            <li>Posisi plank, tangan selebar bahu</li>
+            <li>Turun sampai dada hampir menyentuh lantai</li>
+            <li>Hitung repetisi maksimal dalam 1 menit</li>
+            <li>Target: >30 (putra), >15 (putri)</li>
+          </ul>
+          <br>
+          <p><strong>Sit-up (1 menit):</strong></p>
+          <ul style="margin-left: 20px;">
+            <li>Terlentang, lutut ditekuk 90°</li>
+            <li>Tangan di belakang kepala</li>
+            <li>Bangun sampai siku menyentuh lutut</li>
+            <li>Target: >35 (putra), >30 (putri)</li>
+          </ul>
+          <br>
+          <p><strong>Standing Long Jump:</strong></p>
+          <ul style="margin-left: 20px;">
+            <li>Berdiri di belakang garis start</li>
+            <li>Lompat sejauh mungkin dengan kedua kaki</li>
+            <li>Ukur dari garis start ke tumit terdekat (cm)</li>
+            <li>Target: >180cm (putra), >150cm (putri)</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="measurement-section">
+        <h3>⚡ 3. KECEPATAN & AGILITAS</h3>
+        <div style="line-height: 1.8; color: #2c3e50;">
+          <p><strong>Sprint 20m:</strong></p>
+          <ul style="margin-left: 20px;">
+            <li>Gunakan stopwatch</li>
+            <li>Start dari posisi berdiri</li>
+            <li>Catat waktu dalam detik (2 desimal)</li>
+            <li>Target: <4.0 detik (putra), <4.5 detik (putri)</li>
+          </ul>
+          <br>
+          <p><strong>Shuttle Run 5-10-5:</strong></p>
+          <ul style="margin-left: 20px;">
+            <li>Start di tengah, lari 5m ke kiri, sentuh garis</li>
+            <li>Lari 10m ke kanan, sentuh garis</li>
+            <li>Lari 5m kembali ke tengah</li>
+            <li>Target: <6.0 detik (putra), <6.5 detik (putri)</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="measurement-section">
+        <h3>🧘 4. FLEKSIBILITAS</h3>
+        <div style="line-height: 1.8; color: #2c3e50;">
+          <p><strong>Sit-and-Reach:</strong></p>
+          <ul style="margin-left: 20px;">
+            <li>Duduk kaki lurus, punggung menempel dinding</li>
+            <li>Raih ke depan sejauh mungkin tanpa menekuk lutut</li>
+            <li>Ukur jarak dari ujung jari ke ujung kaki (cm)</li>
+            <li>Target: >+10cm (baik untuk semua)</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="measurement-section">
+        <h3>📊 5. KOMPOSISI TUBUH</h3>
+        <div style="line-height: 1.8; color: #2c3e50;">
+          <p><strong>Berat & Tinggi Badan:</strong></p>
+          <ul style="margin-left: 20px;">
+            <li>Timbang berat (kg) tanpa sepatu</li>
+            <li>Ukur tinggi (cm) tanpa sepatu</li>
+            <li>BMI = Berat / (Tinggi/100)²</li>
+            <li>Target BMI: 18.5 - 24.9 (normal)</li>
+          </ul>
+          <br>
+          <p><strong>Resting Heart Rate:</strong></p>
+          <ul style="margin-left: 20px;">
+            <li>Hitung denyut nadi saat istirahat (60 detik)</li>
+            <li>Atau 15 detik × 4</li>
+            <li>Target: 60-80 bpm (normal)</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div style="background: #e8f4f8; padding: 20px; border-radius: 8px; margin-top: 24px; border-left: 4px solid #0d6efd;">
+        <h4 style="color: #084298; margin-bottom: 12px;">💡 Tips Pengukuran</h4>
+        <ul style="line-height: 1.8; color: #2c3e50; margin-left: 20px;">
+          <li>Lakukan pengukuran di waktu yang sama (pagi lebih konsisten)</li>
+          <li>Pastikan siswa sudah pemanasan 5-10 menit</li>
+          <li>Catat kondisi cuaca jika outdoor</li>
+          <li>Beri kesempatan 2-3 kali percobaan, ambil yang terbaik</li>
+          <li>Update data setiap minggu untuk tracking progress</li>
+        </ul>
+      </div>
+      
+      <div style="background: #d1e7dd; padding: 20px; border-radius: 8px; margin-top: 16px; border-left: 4px solid #198754;">
+        <h4 style="color: #0f5132; margin-bottom: 12px;">📈 Cara Menghitung Perkembangan</h4>
+        <p style="color: #2c3e50; line-height: 1.8;">
+          <strong>Rumus:</strong> ((Nilai Baru - Nilai Lama) / Nilai Lama) × 100%
+          <br><br>
+          <strong>Contoh:</strong><br>
+          Push-up minggu lalu: 20 kali<br>
+          Push-up minggu ini: 25 kali<br>
+          Progress = ((25-20)/20) × 100% = <strong>+25%</strong> 🎉
+        </p>
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+<!-- MEASUREMENT MODAL -->
+<div id="measurementModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>📏 Input Pengukuran Fisik</h2>
+      <p id="modalStudentInfo">Andi Pratama • Kelas 7A • Absen 1</p>
+    </div>
+    
+    <div class="modal-body">
+      <!-- KOMPOSISI TUBUH & KESEHATAN -->
+      <div class="measurement-section">
+        <h3>📊 Komposisi Tubuh & Kesehatan</h3>
+        <div class="measurement-grid">
+          <div class="measurement-field">
+            <label>Berat Badan <span class="unit">(kg)</span></label>
+            <input type="number" id="beratBadan" step="0.1" placeholder="45.5" onchange="calculateBMI()">
+            <div class="help-text">Timbang tanpa sepatu</div>
+          </div>
+          
+          <div class="measurement-field">
+            <label>Tinggi Badan <span class="unit">(cm)</span></label>
+            <input type="number" id="tinggiBadan" step="0.1" placeholder="160" onchange="calculateBMI()">
+            <div class="help-text">Ukur tanpa sepatu</div>
+          </div>
+          
+          <div class="measurement-field">
+            <label>BMI <span class="unit">(auto)</span></label>
+            <input type="text" id="bmi" readonly style="background: #f8f9fa; font-weight: 600;">
+            <div class="help-text" id="bmiCategory">Normal: 18.5-24.9</div>
+          </div>
+          
+          <div class="measurement-field">
+            <label>Resting Heart Rate <span class="unit">(bpm)</span></label>
+            <input type="number" id="heartRate" placeholder="72">
+            <div class="help-text">Denyut nadi istirahat (60 detik)</div>
+          </div>
+        </div>
+        
+        <div class="previous-data">
+          <strong>Data Sebelumnya (2 Jan):</strong> Berat: 45.2kg | Tinggi: 159cm | BMI: 17.9 | HR: 75bpm
+          <span class="trend up">↑ +0.3kg</span>
+        </div>
+      </div>
+      
+      <!-- KARDIO / DAYA TAHAN -->
+      <div class="measurement-section">
+        <h3>🏃 Kardio / Daya Tahan</h3>
+        <div class="measurement-grid">
+          <div class="measurement-field">
+            <label>1.600m Run <span class="unit">(menit:detik)</span></label>
+            <input type="text" id="run1600" placeholder="8:30" pattern="[0-9]{1,2}:[0-9]{2}">
+            <div class="help-text">Format: MM:SS (contoh: 8:30)</div>
+          </div>
+          
+          <div class="measurement-field">
+            <label>12-Minute Run <span class="unit">(meter)</span></label>
+            <input type="number" id="run12min" placeholder="2100">
+            <div class="help-text">Jarak maksimal dalam 12 menit</div>
+          </div>
+        </div>
+        
+        <div class="previous-data">
+          <strong>Data Sebelumnya:</strong> 1600m: 8:45 | 12-min: 2050m
+          <span class="trend up">↑ Lebih cepat 15 detik</span>
+        </div>
+      </div>
+      
+      <!-- KEKUATAN & DAYA TAHAN OTOT -->
+      <div class="measurement-section">
+        <h3>💪 Kekuatan & Daya Tahan Otot</h3>
+        <div class="measurement-grid">
+          <div class="measurement-field">
+            <label>Push-up <span class="unit">(1 menit)</span></label>
+            <input type="number" id="pushup" placeholder="25">
+            <div class="help-text">Jumlah repetisi maksimal</div>
+          </div>
+          
+          <div class="measurement-field">
+            <label>Sit-up <span class="unit">(1 menit)</span></label>
+            <input type="number" id="situp" placeholder="30">
+            <div class="help-text">Jumlah repetisi maksimal</div>
+          </div>
+          
+          <div class="measurement-field">
+            <label>Standing Long Jump <span class="unit">(cm)</span></label>
+            <input type="number" id="longJump" placeholder="175">
+            <div class="help-text">Jarak lompatan dari garis start</div>
+          </div>
+        </div>
+        
+        <div class="previous-data">
+          <strong>Data Sebelumnya:</strong> Push-up: 20 | Sit-up: 28 | Jump: 170cm
+          <span class="trend up">↑ Push-up +5 (+25%)</span>
+        </div>
+      </div>
+      
+      <!-- KECEPATAN & AGILITAS -->
+      <div class="measurement-section">
+        <h3>⚡ Kecepatan & Agilitas</h3>
+        <div class="measurement-grid">
+          <div class="measurement-field">
+            <label>Sprint 20m <span class="unit">(detik)</span></label>
+            <input type="number" id="sprint20" step="0.01" placeholder="3.85">
+            <div class="help-text">Waktu tempuh (2 desimal)</div>
+          </div>
+          
+          <div class="measurement-field">
+            <label>Shuttle Run 5-10-5 <span class="unit">(detik)</span></label>
+            <input type="number" id="shuttleRun" step="0.01" placeholder="5.75">
+            <div class="help-text">Total waktu (2 desimal)</div>
+          </div>
+        </div>
+        
+        <div class="previous-data">
+          <strong>Data Sebelumnya:</strong> Sprint: 3.92s | Shuttle: 5.85s
+          <span class="trend up">↑ Lebih cepat 0.07s</span>
+        </div>
+      </div>
+      
+      <!-- FLEKSIBILITAS -->
+      <div class="measurement-section">
+        <h3>🧘 Fleksibilitas & Mobilitas</h3>
+        <div class="measurement-grid">
+          <div class="measurement-field">
+            <label>Sit-and-Reach <span class="unit">(cm)</span></label>
+            <input type="number" id="sitReach" placeholder="12">
+            <div class="help-text">Jarak dari ujung jari ke ujung kaki</div>
+          </div>
+          
+          <div class="measurement-field">
+            <label>Single-Leg Balance <span class="unit">(detik)</span></label>
+            <input type="number" id="balance" placeholder="45">
+            <div class="help-text">Waktu bertahan (opsional)</div>
+          </div>
+        </div>
+        
+        <div class="previous-data">
+          <strong>Data Sebelumnya:</strong> Sit-reach: 10cm | Balance: 40s
+          <span class="trend up">↑ +2cm fleksibilitas</span>
+        </div>
+      </div>
+      
+      <!-- CATATAN TAMBAHAN -->
+      <div class="measurement-section">
+        <h3>📝 Catatan & Observasi</h3>
+        <textarea id="catatanGuru" rows="4" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-family: inherit;" placeholder="Catat kondisi siswa, kesulitan yang dialami, atau hal penting lainnya..."></textarea>
+      </div>
+      
+      <!-- GOAL SETTING -->
+      <div style="background: #fff3cd; padding: 16px; border-radius: 8px; border-left: 4px solid #ffc107;">
+        <strong style="color: #856404;">🎯 Target Minggu Depan:</strong>
+        <div style="margin-top: 8px;">
+          <input type="text" id="goalNext" style="width: 100%; padding: 10px; border: 2px solid #ffc107; border-radius: 6px;" placeholder="Contoh: Tingkatkan push-up menjadi 30x, kurangi waktu lari 10 detik">
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">❌ Batal</button>
+      <button class="btn btn-primary" onclick="saveMeasurement()">💾 Simpan Data</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// CONFIG
+const CONFIG = {
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwEdF_TXgxl-luItldO0yiKwMCIQ7BkVEIZsDnqbLx3l8MIyp6nvd7xKqw_T4UeNIzX/exec'
+};
+
+// State
+let currentStudent = {
+  name: '',
+  number: 0,
+  class: ''
+};
+
+let currentClass = '7A';
+let currentWeek = 1;
+let currentMonth = '2026-01';
+
+// Initialize
+window.addEventListener('DOMContentLoaded', () => {
+  // Set current date
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  document.getElementById('currentDate').textContent = dateStr;
+  
+  // Load default data
+  loadWeekData();
+});
+
+// Date & Class Selection
+function selectClass(className) {
+  currentClass = className;
+  
+  // Update active state
+  document.querySelectorAll('.schedule-item').forEach(item => {
+    item.classList.remove('active');
+  });
+  event.target.closest('.schedule-item').classList.add('active');
+  
+  // Reload student list for this class
+  loadStudentList(className);
+}
+
+function loadWeekData() {
+  currentWeek = document.getElementById('weekSelect').value;
+  console.log('Loading week:', currentWeek);
+  // Load measurements for this week
+}
+
+function loadMonthData() {
+  currentMonth = document.getElementById('monthSelect').value;
+  console.log('Loading month:', currentMonth);
+  // Load monthly data
+}
+
+function loadStudentList(className) {
+  // In production, fetch from Google Sheets
+  console.log('Loading students for class:', className);
+  updateStats();
+}
+
+function updateStats() {
+  // Update statistics (mock data)
+  document.getElementById('statTotal').textContent = '32';
+  document.getElementById('statMeasured').textContent = '12';
+  document.getElementById('statPending').textContent = '20';
+  document.getElementById('statProgress').textContent = '38%';
+}
+
+// Tabs
+function showTab(tabName) {
+  // Hide all tabs
+  document.querySelectorAll('.tab-content').forEach(tab => {
+    tab.style.display = 'none';
+  });
+  
+  // Remove active from all tab buttons
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  // Show selected tab
+  document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).style.display = 'block';
+  
+  // Add active to clicked button
+  event.target.classList.add('active');
+}
+
+// Modal Functions
+function openMeasurementModal(name, number, className) {
+  currentStudent = { name, number, class: className };
+  document.getElementById('modalStudentInfo').textContent = `${name} • Kelas ${className} • Absen ${number}`;
+  document.getElementById('measurementModal').classList.add('show');
+  
+  // Load previous data if exists
+  loadPreviousData(name, className);
+}
+
+function closeModal() {
+  document.getElementById('measurementModal').classList.remove('show');
+  resetForm();
+}
+
+function loadPreviousData(name, className) {
+  // In production, fetch from Google Sheets
+  console.log('Loading previous data for:', name, className);
+  // Populate form with previous values if available
+}
+
+function resetForm() {
+  // Clear all inputs
+  document.querySelectorAll('input[type="number"], input[type="text"], textarea').forEach(input => {
+    if (!input.readOnly) {
+      input.value = '';
+    }
+  });
+}
+
+// BMI Calculation
+function calculateBMI() {
+  const weight = parseFloat(document.getElementById('beratBadan').value);
+  const height = parseFloat(document.getElementById('tinggiBadan').value);
+  
+  if (weight && height) {
+    const heightInMeters = height / 100;
+    const bmi = (weight / (heightInMeters * heightInMeters)).toFixed(1);
+    document.getElementById('bmi').value = bmi;
+    
+    // Update category
+    const category = document.getElementById('bmiCategory');
+    if (bmi < 18.5) {
+      category.textContent = 'Underweight';
+      category.style.color = '#f39c12';
+    } else if (bmi < 25) {
+      category.textContent = '✓ Normal';
+      category.style.color = '#27ae60';
+    } else if (bmi < 30) {
+      category.textContent = 'Overweight';
+      category.style.color = '#e67e22';
+    } else {
+      category.textContent = 'Obesitas';
+      category.style.color = '#e74c3c';
+    }
+  }
+}
+
+// Save Measurement
+async function saveMeasurement() {
+  // Validate required fields
+  const beratBadan = document.getElementById('beratBadan').value;
+  const tinggiBadan = document.getElementById('tinggiBadan').value;
+  
+  if (!beratBadan || !tinggiBadan) {
+    alert('⚠️ Minimal isi Berat dan Tinggi Badan!');
+    return;
+  }
+  
+  // Collect all data
+  const measurementData = {
+    type: 'fitnessMeasurement',
+    studentName: currentStudent.name,
+    studentNumber: currentStudent.number,
+    class: currentStudent.class,
+    week: currentWeek,
+    month: currentMonth,
+    date: new Date().toISOString(),
+    
+    // Body composition
+    beratBadan: parseFloat(beratBadan) || null,
+    tinggiBadan: parseFloat(document.getElementById('tinggiBadan').value) || null,
+    bmi: parseFloat(document.getElementById('bmi').value) || null,
+    heartRate: parseInt(document.getElementById('heartRate').value) || null,
+    
+    // Cardio
+    run1600: document.getElementById('run1600').value || null,
+    run12min: parseInt(document.getElementById('run12min').value) || null,
+    
+    // Strength
+    pushup: parseInt(document.getElementById('pushup').value) || null,
+    situp: parseInt(document.getElementById('situp').value) || null,
+    longJump: parseInt(document.getElementById('longJump').value) || null,
+    
+    // Speed & Agility
+    sprint20: parseFloat(document.getElementById('sprint20').value) || null,
+    shuttleRun: parseFloat(document.getElementById('shuttleRun').value) || null,
+    
+    // Flexibility
+    sitReach: parseInt(document.getElementById('sitReach').value) || null,
+    balance: parseInt(document.getElementById('balance').value) || null,
+    
+    // Notes
+    catatan: document.getElementById('catatanGuru').value || '',
+    goal: document.getElementById('goalNext').value || ''
+  };
+  
+  try {
+    // Show loading
+    event.target.disabled = true;
+    event.target.innerHTML = '⏳ Menyimpan...';
+    
+    // Save to Google Sheets
+    const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(measurementData)
+    });
+    
+    alert('✅ Data pengukuran berhasil disimpan!');
+    closeModal();
+    loadStudentList(currentClass);
+    
+  } catch (error) {
+    alert('❌ Gagal menyimpan: ' + error.message);
+  } finally {
+    event.target.disabled = false;
+    event.target.innerHTML = '💾 Simpan Data';
+  }
+}
+
+// Report Functions
+function generateReport() {
+  alert('🔄 Generating laporan mingguan...\n\nFitur ini akan menampilkan laporan lengkap perkembangan siswa.');
+}
+
+function exportReport() {
+  alert('📤 Exporting ke PDF...\n\nLaporan akan diunduh dalam format PDF.');
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+  const modal = document.getElementById('measurementModal');
+  if (event.target === modal) {
+    closeModal();
+  }
+}
+</script>
+
+</body>
+</html>
