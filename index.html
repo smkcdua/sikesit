@@ -426,7 +426,7 @@
     <div style="display: flex; align-items: center; gap: 16px;">
       <div style="text-align: right; font-size: 14px;">
         <div style="font-weight: 600;">👨‍🏫 <span id="guruName">Guru PJOK</span></div>
-        <div style="font-size: 12px; opacity: 0.9;">SMK Cokroaminoto 2 Banjarnegara</div>
+        <div style="font-size: 12px; opacity: 0.9;">SMPN 1 Bojonegoro</div>
       </div>
       <button class="btn-secondary" onclick="window.location.href='guru.html'" style="padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; color: white;">
         ← Kembali
@@ -870,7 +870,7 @@
 <script>
 // CONFIG
 const CONFIG = {
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby42XPC3LxUrUJnbGA32ASxAc8fQ7QFcFedrxpisCC-CK3M-X6a_uaPzB7AZqRHv28F/exec'
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyP6GQtG1wcxNIS-WuB5HI31ryXqdWA39iUiKscO78LnCT1_vP9N_4DXoLAXfz0Hc7P/exec'
 };
 
 // State
@@ -904,56 +904,43 @@ window.addEventListener('DOMContentLoaded', () => {
 
 async function loadSchedulesAndStudents() {
   try {
+    console.log('Fetching schedules from Apps Script...');
+    
     // Fetch schedules
     const scheduleResponse = await fetch(CONFIG.APPS_SCRIPT_URL + '?action=getSchedules');
     const scheduleData = await scheduleResponse.json();
     
-    if (scheduleData.success) {
-      allSchedules = scheduleData.data || [];
+    if (scheduleData.success && scheduleData.data) {
+      allSchedules = scheduleData.data;
+      console.log('Schedules loaded:', allSchedules.length, 'classes');
     } else {
-      loadMockSchedules();
+      console.error('Failed to load schedules:', scheduleData.message);
+      alert('⚠️ Gagal memuat jadwal. Pastikan Google Apps Script sudah dikonfigurasi.');
+      return;
     }
     
     // Fetch students
+    console.log('Fetching students from Apps Script...');
     const studentResponse = await fetch(CONFIG.APPS_SCRIPT_URL + '?action=getStudents');
     const studentData = await studentResponse.json();
     
-    if (studentData.success) {
-      allStudents = studentData.data || [];
+    if (studentData.success && studentData.data) {
+      allStudents = studentData.data;
+      console.log('Students loaded:', allStudents.length, 'students');
     } else {
-      loadMockStudents();
+      console.error('Failed to load students:', studentData.message);
+      alert('⚠️ Gagal memuat data siswa. Pastikan Google Apps Script sudah dikonfigurasi.');
+      return;
     }
     
   } catch (error) {
-    console.log('Using mock data');
-    loadMockSchedules();
-    loadMockStudents();
+    console.error('Error loading data:', error);
+    alert('❌ Error: ' + error.message + '\n\nPastikan Google Apps Script sudah di-deploy dan dapat diakses.');
+    return;
   }
   
   renderSchedules();
   loadTodayClasses();
-}
-
-function loadMockSchedules() {
-  allSchedules = [
-    { classID: '1', className: '7A', dayOfWeek: 'Monday', startTime: '07:00', endTime: '08:30', teacher: 'Budi Santoso' },
-    { classID: '2', className: '7B', dayOfWeek: 'Monday', startTime: '08:30', endTime: '10:00', teacher: 'Siti Nurhaliza' },
-    { classID: '3', className: '8A', dayOfWeek: 'Tuesday', startTime: '10:15', endTime: '11:45', teacher: 'Budi Santoso' },
-    { classID: '4', className: '7A', dayOfWeek: 'Wednesday', startTime: '07:00', endTime: '08:30', teacher: 'Budi Santoso' },
-    { classID: '5', className: '8B', dayOfWeek: 'Friday', startTime: '09:00', endTime: '10:30', teacher: 'Siti Nurhaliza' }
-  ];
-}
-
-function loadMockStudents() {
-  allStudents = [
-    { studentID: '1', studentName: 'Andi Pratama', className: '7A', number: 1 },
-    { studentID: '2', studentName: 'Budi Santoso', className: '7A', number: 2 },
-    { studentID: '3', studentName: 'Citra Dewi', className: '7A', number: 3 },
-    { studentID: '4', studentName: 'Doni Setiawan', className: '7B', number: 1 },
-    { studentID: '5', studentName: 'Eka Putri', className: '7B', number: 2 },
-    { studentID: '6', studentName: 'Fajar Rahman', className: '8A', number: 1 },
-    { studentID: '7', studentName: 'Gita Sari', className: '8A', number: 2 }
-  ];
 }
 
 function renderSchedules() {
@@ -1250,9 +1237,6 @@ window.onclick = function(event) {
   }
 }
 </script>
-
-</body>
-</html>
 
 </body>
 </html>
