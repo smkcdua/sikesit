@@ -557,11 +557,45 @@
   <!-- TAB CONTENT: PROGRESS (Hidden by default) -->
   <div id="tabProgress" class="tab-content" style="display: none;">
     <div style="background: white; padding: 24px; border-radius: 12px;">
-      <h3>📊 Grafik Perkembangan Kelas 7A</h3>
-      <p style="color: #7f8c8d; margin: 16px 0;">Pilih siswa untuk melihat detail perkembangan individu</p>
-      <div style="padding: 40px; text-align: center; background: #f8f9fa; border-radius: 8px;">
-        <div style="font-size: 48px; margin-bottom: 16px;">📈</div>
-        <p style="color: #7f8c8d;">Grafik perkembangan akan ditampilkan di sini</p>
+      <h3>📊 Grafik Perkembangan Siswa</h3>
+      <p style="color: #7f8c8d; margin: 16px 0;">Pilih dashboard untuk melihat visualisasi perkembangan kebugaran</p>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin: 24px 0;">
+        <!-- Dashboard Real-time -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; color: white; cursor: pointer;" onclick="window.open('dashboard.html', '_blank')">
+          <div style="font-size: 32px; margin-bottom: 12px;">📈</div>
+          <h4 style="margin-bottom: 8px;">Dashboard Progres</h4>
+          <p style="font-size: 13px; opacity: 0.9;">Real-time monitoring dengan metrik utama, ranking, dan achievement</p>
+          <div style="margin-top: 12px; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 6px; text-align: center; font-weight: 600; font-size: 12px;">
+            Buka Dashboard →
+          </div>
+        </div>
+        
+        <!-- Progress Charts -->
+        <div style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%); padding: 20px; border-radius: 12px; color: white; cursor: pointer;" onclick="window.open('progress-chart.html', '_blank')">
+          <div style="font-size: 32px; margin-bottom: 12px;">📊</div>
+          <h4 style="margin-bottom: 8px;">Grafik Perkembangan</h4>
+          <p style="font-size: 13px; opacity: 0.9;">Multi-tab dengan ringkasan kelas, data individu, dan perbandingan</p>
+          <div style="margin-top: 12px; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 6px; text-align: center; font-weight: 600; font-size: 12px;">
+            Lihat Grafik →
+          </div>
+        </div>
+        
+        <!-- Analytics Detail -->
+        <div style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); padding: 20px; border-radius: 12px; color: white; cursor: pointer;" onclick="window.open('analytics.html', '_blank')">
+          <div style="font-size: 32px; margin-bottom: 12px;">📋</div>
+          <h4 style="margin-bottom: 8px;">Analytics Detail</h4>
+          <p style="font-size: 13px; opacity: 0.9;">Analisis mendalam dengan tren 4 minggu dan tabel detail</p>
+          <div style="margin-top: 12px; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 6px; text-align: center; font-weight: 600; font-size: 12px;">
+            Buka Analytics →
+          </div>
+        </div>
+      </div>
+      
+      <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin-top: 24px; border-left: 4px solid #27ae60;">
+        <p style="font-size: 13px; color: #2c3e50; line-height: 1.6;">
+          <strong>💡 Tips:</strong> Klik salah satu dashboard di atas untuk melihat visualisasi perkembangan kebugaran siswa secara real-time. Setiap dashboard menampilkan data yang terintegrasi dengan Google Sheets.
+        </p>
       </div>
     </div>
   </div>
