@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grafik Perkembangan - Pemantauan Fisik</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header h1 {
+      color: #2c3e50;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .header-controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    
+    select, input {
+      padding: 10px 16px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    select:focus, input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    button {
+      padding: 10px 20px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    button:hover {
+      background: #764ba2;
+      transform: translateY(-2px);
+    }
+    
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      background: white;
+      border-radius: 12px;
+      color: #667eea;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .error {
+      padding: 16px;
+      background: #f8d7da;
+      color: #721c24;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      border-left: 4px solid #f5c6cb;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    
+    .stat-card h4 {
+      color: #7f8c8d;
+      font-size: 12px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    
+    .stat-card .value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #667eea;
+    }
+    
+    .stat-card .trend {
+      font-size: 14px;
+      color: #27ae60;
+      margin-top: 8px;
+    }
+    
+    .chart-container {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      margin-bottom: 24px;
+    }
+    
+    .chart-container h2 {
+      color: #2c3e50;
+      margin-bottom: 16px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .chart-wrapper {
+      position: relative;
+      height: 400px;
+      margin-bottom: 16px;
+    }
+    
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .student-progress-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .student-name {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 16px;
+      font-size: 16px;
+    }
+    
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #ecf0f1;
+    }
+    
+    .metric-row:last-child {
+      border-bottom: none;
+    }
+    
+    .metric-name {
+      color: #7f8c8d;
+      font-size: 13px;
+    }
+    
+    .metric-value {
+      font-weight: 600;
+      color: #2c3e50;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .progress-arrow {
+      font-size: 16px;
+    }
+    
+    .up {
+      color: #27ae60;
+    }
+    
+    .down {
+      color: #e74c3c;
+    }
+    
+    .neutral {
+      color: #95a5a6;
+    }
+    
+    .controls {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    
+    .tab-btn {
+      padding: 10px 20px;
+      background: white;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      color: #7f8c8d;
+      transition: all 0.3s;
+    }
+    
+    .tab-btn.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <div class="header">
+      <h1>📊 Grafik Perkembangan Siswa</h1>
+      <div class="header-controls">
+        <select id="classSelect" onchange="loadData()">
+          <option value="">Pilih Kelas</option>
+          <option value="7A">Kelas 7A</option>
+          <option value="7B">Kelas 7B</option>
+          <option value="8A">Kelas 8A</option>
+        </select>
+        <input type="month" id="monthSelect" onchange="loadData()">
+        <button onclick="loadData()">🔄 Refresh</button>
+        <button onclick="exportChart()">📥 Export</button>
+      </div>
+    </div>
+    
+    <!-- ERROR MESSAGE -->
+    <div id="errorMessage" class="error" style="display: none;"></div>
+    
+    <!-- LOADING STATE -->
+    <div id="loadingState" class="loading" style="display: none;">
+      ⏳ Loading data...
+    </div>
+    
+    <!-- STATISTICS -->
+    <div id="statsContainer" class="stats-grid" style="display: none;">
+      <div class="stat-card">
+        <h4>Total Siswa</h4>
+        <div class="value" id="statTotal">0</div>
+      </div>
+      <div class="stat-card">
+        <h4>Terukur</h4>
+        <div class="value" id="statMeasured">0</div>
+        <div class="trend" id="statMeasuredTrend"></div>
+      </div>
+      <div class="stat-card">
+        <h4>Progress Rata-Rata</h4>
+        <div class="value" id="statAvgProgress">0%</div>
+        <div class="trend" id="statProgressTrend"></div>
+      </div>
+    </div>
+    
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('overview')">📈 Ringkasan</button>
+      <button class="tab-btn" onclick="switchTab('individuals')">👥 Individu</button>
+      <button class="tab-btn" onclick="switchTab('comparison')">⚔️ Perbandingan</button>
+    </div>
+    
+    <!-- TAB: OVERVIEW -->
+    <div id="overviewTab" class="tab-content active">
+      <!-- Class Progress -->
+      <div class="chart-container">
+        <h2>📊 Progress Kelas Keseluruhan</h2>
+        <div class="chart-wrapper">
+          <canvas id="classProgressChart"></canvas>
+        </div>
+      </div>
+      
+      <!-- Metrics Distribution -->
+      <div class="chart-container">
+        <h2>💪 Distribusi Metrik Kesehatan</h2>
+        <div class="chart-wrapper">
+          <canvas id="metricsDistributionChart"></canvas>
+        </div>
+      </div>
+      
+      <!-- Weekly Trend -->
+      <div class="chart-container">
+        <h2>📅 Tren Mingguan</h2>
+        <div class="chart-wrapper">
+          <canvas id="weeklyTrendChart"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <!-- TAB: INDIVIDUALS -->
+    <div id="individualsTab" class="tab-content">
+      <div class="controls">
+        <label>Pilih Siswa:</label>
+        <select id="studentSelect" onchange="loadIndividualData()">
+          <option value="">Semua Siswa</option>
+        </select>
+      </div>
+      
+      <!-- Individual Progress Chart -->
+      <div class="chart-container">
+        <h2>📈 Progress Individu</h2>
+        <div class="chart-wrapper">
+          <canvas id="individualProgressChart"></canvas>
+        </div>
+      </div>
+      
+      <!-- Individual Radar -->
+      <div class="chart-container">
+        <h2>⭐ Profil Kebugaran</h2>
+        <div class="chart-wrapper">
+          <canvas id="radarChart"></canvas>
+        </div>
+      </div>
+      
+      <!-- Comparison Grid -->
+      <div id="comparisonGrid" class="comparison-grid"></div>
+    </div>
+    
+    <!-- TAB: COMPARISON -->
+    <div id="comparisonTab" class="tab-content">
+      <!-- Top Performers -->
+      <div class="chart-container">
+        <h2>🏆 Top Performers</h2>
+        <div class="chart-wrapper">
+          <canvas id="topPerformersChart"></canvas>
+        </div>
+      </div>
+      
+      <!-- Fitness Level Distribution -->
+      <div class="chart-container">
+        <h2>🎯 Kategori Kebugaran</h2>
+        <div class="chart-wrapper">
+          <canvas id="fitnessLevelChart"></canvas>
+        </div>
+      </div>
+      
+      <!-- Gender Comparison -->
+      <div class="chart-container">
+        <h2>👨👩 Perbandingan Gender</h2>
+        <div class="chart-wrapper">
+          <canvas id="genderComparisonChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const CONFIG = {
+      APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby42XPC3LxUrUJnbGA32ASxAc8fQ7QFcFedrxpisCC-CK3M-X6a_uaPzB7AZqRHv28F/exec',
+      SPREADSHEET_ID: '19GBSrxikpO2KUWonR4YihDGlFhLBSju7mz9zmrG8Q3A'
+    };
+    
+    let charts = {};
+    let allData = [];
+    let filteredData = [];
+    
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      setCurrentMonth();
+      loadData();
+    });
+    
+    function setCurrentMonth() {
+      const today = new Date();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const year = today.getFullYear();
+      document.getElementById('monthSelect').value = `${year}-${month}`;
+    }
+    
+    function showLoading() {
+      document.getElementById('loadingState').style.display = 'block';
+    }
+    
+    function hideLoading() {
+      document.getElementById('loadingState').style.display = 'none';
+    }
+    
+    function showError(message) {
+      const errorEl = document.getElementById('errorMessage');
+      errorEl.textContent = message;
+      errorEl.style.display = 'block';
+    }
+    
+    function hideError() {
+      document.getElementById('errorMessage').style.display = 'none';
+    }
+    
+    async function loadData() {
+      showLoading();
+      hideError();
+      
+      try {
+        const selectedClass = document.getElementById('classSelect').value;
+        const selectedMonth = document.getElementById('monthSelect').value;
+        
+        if (!selectedClass) {
+          hideLoading();
+          showError('Pilih kelas terlebih dahulu');
+          return;
+        }
+        
+        // Fetch data from Google Apps Script
+        const response = await fetch(CONFIG.APPS_SCRIPT_URL + '?action=getData&class=' + selectedClass + '&month=' + selectedMonth);
+        const result = await response.json();
+        
+        if (result.success) {
+          allData = result.data || [];
+          filteredData = allData;
+          
+          updateStatistics();
+          populateStudentSelect();
+          renderCharts();
+          
+          document.getElementById('statsContainer').style.display = 'grid';
+        } else {
+          throw new Error(result.error || 'Failed to load data');
+        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+        showError('Gagal memuat data: ' + error.message);
+        // Load mock data for demonstration
+        loadMockData();
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    function loadMockData() {
+      allData = [
+        {
+          studentName: 'Andi Pratama',
+          class: '7A',
+          week: 1,
+          pushup: 20,
+          situp: 28,
+          run1600: '8:45',
+          sprint20: 3.92,
+          beratBadan: 45.2,
+          tinggiBadan: 159,
+          bmi: 17.9
+        },
+        {
+          studentName: 'Budi Santoso',
+          class: '7A',
+          week: 1,
+          pushup: 25,
+          situp: 35,
+          run1600: '8:30',
+          sprint20: 3.80,
+          beratBadan: 48.5,
+          tinggiBadan: 162,
+          bmi: 18.5
+        },
+        {
+          studentName: 'Citra Dewi',
+          class: '7A',
+          week: 1,
+          pushup: 15,
+          situp: 30,
+          run1600: '9:00',
+          sprint20: 4.10,
+          beratBadan: 42.0,
+          tinggiBadan: 155,
+          bmi: 17.5
+        },
+        {
+          studentName: 'Andi Pratama',
+          class: '7A',
+          week: 2,
+          pushup: 25,
+          situp: 30,
+          run1600: '8:35',
+          sprint20: 3.85,
+          beratBadan: 45.5,
+          tinggiBadan: 159,
+          bmi: 18.0
+        }
+      ];
+      
+      filteredData = allData;
+      updateStatistics();
+      populateStudentSelect();
+      renderCharts();
+      document.getElementById('statsContainer').style.display = 'grid';
+    }
+    
+    function updateStatistics() {
+      const uniqueStudents = new Set(allData.map(d => d.studentName)).size;
+      const totalMeasured = allData.length;
+      
+      document.getElementById('statTotal').textContent = uniqueStudents;
+      document.getElementById('statMeasured').textContent = totalMeasured;
+      document.getElementById('statAvgProgress').textContent = Math.round(totalMeasured / (uniqueStudents * 4) * 100) + '%';
+    }
+    
+    function populateStudentSelect() {
+      const students = [...new Set(allData.map(d => d.studentName))];
+      const select = document.getElementById('studentSelect');
+      const currentValue = select.value;
+      
+      select.innerHTML = '<option value="">Semua Siswa</option>';
+      students.forEach(student => {
+        const option = document.createElement('option');
+        option.value = student;
+        option.textContent = student;
+        select.appendChild(option);
+      });
+      
+      select.value = currentValue;
+    }
+    
+    function renderCharts() {
+      renderClassProgressChart();
+      renderMetricsDistributionChart();
+      renderWeeklyTrendChart();
+      renderTopPerformersChart();
+      renderFitnessLevelChart();
+      renderGenderComparisonChart();
+      loadIndividualData();
+    }
+    
+    function renderClassProgressChart() {
+      const ctx = document.getElementById('classProgressChart')?.getContext('2d');
+      if (!ctx) return;
+      
+      const weeks = [...new Set(allData.map(d => d.week))].sort();
+      const avgPushup = weeks.map(w => {
+        const data = allData.filter(d => d.week === w && d.pushup);
+        return data.length ? (data.reduce((s, d) => s + d.pushup, 0) / data.length).toFixed(1) : 0;
+      });
+      
+      const avgSitup = weeks.map(w => {
+        const data = allData.filter(d => d.week === w && d.situp);
+        return data.length ? (data.reduce((s, d) => s + d.situp, 0) / data.length).toFixed(1) : 0;
+      });
+      
+      if (charts.classProgressChart) charts.classProgressChart.destroy();
+      charts.classProgressChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: weeks.map(w => 'Minggu ' + w),
+          datasets: [
+            {
+              label: '📊 Rata-rata Push-up',
+              data: avgPushup,
+              borderColor: '#667eea',
+              backgroundColor: 'rgba(102, 126, 234, 0.1)',
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: '📊 Rata-rata Sit-up',
+              data: avgSitup,
+              borderColor: '#764ba2',
+              backgroundColor: 'rgba(118, 75, 162, 0.1)',
+              tension: 0.4,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'top' }
+          },
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+    
+    function renderMetricsDistributionChart() {
+      const ctx = document.getElementById('metricsDistributionChart')?.getContext('2d');
+      if (!ctx) return;
+      
+      const latestData = allData.filter((d, i) => 
+        allData.findIndex(x => x.studentName === d.studentName) === i
+      );
+      
+      const pushups = latestData.map(d => d.pushup || 0);
+      const situps = latestData.map(d => d.situp || 0);
+      
+      if (charts.metricsDistributionChart) charts.metricsDistributionChart.destroy();
+      charts.metricsDistributionChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: latestData.map(d => d.studentName),
+          datasets: [
+            {
+              label: 'Push-up',
+              data: pushups,
+              backgroundColor: '#667eea'
+            },
+            {
+              label: 'Sit-up',
+              data: situps,
+              backgroundColor: '#764ba2'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'top' }
+          },
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+    
+    function renderWeeklyTrendChart() {
+      const ctx = document.getElementById('weeklyTrendChart')?.getContext('2d');
+      if (!ctx) return;
+      
+      const weeks = [...new Set(allData.map(d => d.week))].sort();
+      const totalRecords = weeks.map(w => allData.filter(d => d.week === w).length);
+      
+      if (charts.weeklyTrendChart) charts.weeklyTrendChart.destroy();
+      charts.weeklyTrendChart = new Chart(ctx, {
+        type: 'area',
+        data: {
+          labels: weeks.map(w => 'Minggu ' + w),
+          datasets: [{
+            label: 'Jumlah Pengukuran',
+            data: totalRecords,
+            borderColor: '#27ae60',
+            backgroundColor: 'rgba(39, 174, 96, 0.2)',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'top' } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+    
+    function renderTopPerformersChart() {
+      const ctx = document.getElementById('topPerformersChart')?.getContext('2d');
+      if (!ctx) return;
+      
+      const latestData = [];
+      allData.forEach(d => {
+        const existing = latestData.find(x => x.studentName === d.studentName);
+        if (!existing) {
+          latestData.push(d);
+        }
+      });
+      
+      latestData.sort((a, b) => (b.pushup || 0) + (b.situp || 0) - ((a.pushup || 0) + (a.situp || 0)));
+      const top5 = latestData.slice(0, 5);
+      
+      if (charts.topPerformersChart) charts.topPerformersChart.destroy();
+      charts.topPerformersChart = new Chart(ctx, {
+        type: 'horizontalBar',
+        data: {
+          labels: top5.map(d => d.studentName),
+          datasets: [{
+            label: 'Skor Kebugaran',
+            data: top5.map(d => (d.pushup || 0) + (d.situp || 0)),
+            backgroundColor: '#27ae60'
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+    
+    function renderFitnessLevelChart() {
+      const ctx = document.getElementById('fitnessLevelChart')?.getContext('2d');
+      if (!ctx) return;
+      
+      const latestData = [];
+      allData.forEach(d => {
+        const existing = latestData.find(x => x.studentName === d.studentName);
+        if (!existing) {
+          latestData.push(d);
+        }
+      });
+      
+      const categories = {
+        excellent: latestData.filter(d => (d.pushup || 0) >= 30).length,
+        good: latestData.filter(d => (d.pushup || 0) >= 20 && (d.pushup || 0) < 30).length,
+        average: latestData.filter(d => (d.pushup || 0) >= 10 && (d.pushup || 0) < 20).length,
+        needsImprovement: latestData.filter(d => (d.pushup || 0) < 10).length
+      };
+      
+      if (charts.fitnessLevelChart) charts.fitnessLevelChart.destroy();
+      charts.fitnessLevelChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Excellent', 'Good', 'Average', 'Needs Improvement'],
+          datasets: [{
+            data: [categories.excellent, categories.good, categories.average, categories.needsImprovement],
+            backgroundColor: ['#27ae60', '#f39c12', '#e67e22', '#e74c3c']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+    }
+    
+    function renderGenderComparisonChart() {
+      const ctx = document.getElementById('genderComparisonChart')?.getContext('2d');
+      if (!ctx) return;
+      
+      const latestData = [];
+      allData.forEach(d => {
+        const existing = latestData.find(x => x.studentName === d.studentName);
+        if (!existing) {
+          latestData.push(d);
+        }
+      });
+      
+      if (charts.genderComparisonChart) charts.genderComparisonChart.destroy();
+      charts.genderComparisonChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: ['Push-up', 'Sit-up', 'Kecepatan', 'Ketahanan'],
+          datasets: [{
+            label: 'Rata-rata Kelas',
+            data: [
+              (latestData.reduce((s, d) => s + (d.pushup || 0), 0) / latestData.length).toFixed(1),
+              (latestData.reduce((s, d) => s + (d.situp || 0), 0) / latestData.length).toFixed(1),
+              (latestData.reduce((s, d) => s + (d.sprint20 ? (5 - d.sprint20) * 10 : 0), 0) / latestData.length).toFixed(1),
+              (latestData.reduce((s, d) => s + (d.bmi || 0), 0) / latestData.length).toFixed(1)
+            ],
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102, 126, 234, 0.2)'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: { beginAtZero: true }
+          }
+        }
+      });
+    }
+    
+    function loadIndividualData() {
+      const selectedStudent = document.getElementById('studentSelect').value;
+      
+      if (selectedStudent) {
+        filteredData = allData.filter(d => d.studentName === selectedStudent);
+        renderIndividualProgressChart();
+        renderRadarChart();
+      } else {
+        renderRadarChart();
+      }
+    }
+    
+    function renderIndividualProgressChart() {
+      const ctx = document.getElementById('individualProgressChart')?.getContext('2d');
+      if (!ctx) return;
+      
+      filteredData.sort((a, b) => a.week - b.week);
+      
+      if (charts.individualProgressChart) charts.individualProgressChart.destroy();
+      charts.individualProgressChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: filteredData.map(d => 'Minggu ' + d.week),
+          datasets: [
+            {
+              label: 'Push-up',
+              data: filteredData.map(d => d.pushup || 0),
+              borderColor: '#667eea',
+              fill: false
+            },
+            {
+              label: 'Sit-up',
+              data: filteredData.map(d => d.situp || 0),
+              borderColor: '#764ba2',
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'top' } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+    
+    function renderRadarChart() {
+      const ctx = document.getElementById('radarChart')?.getContext('2d');
+      if (!ctx) return;
+      
+      const latestRecord = filteredData.length > 0 
+        ? filteredData[filteredData.length - 1] 
+        : allData[allData.length - 1];
+      
+      if (charts.radarChart) charts.radarChart.destroy();
+      charts.radarChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: ['Kekuatan', 'Ketahanan', 'Kecepatan', 'Fleksibilitas', 'Komposisi'],
+          datasets: [{
+            label: 'Profil Kebugaran',
+            data: [
+              latestRecord.pushup || 0,
+              latestRecord.situp || 0,
+              latestRecord.sprint20 ? (5 - latestRecord.sprint20) * 10 : 0,
+              latestRecord.sitReach || 0,
+              (latestRecord.bmi || 0) * 5
+            ],
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102, 126, 234, 0.2)'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: { r: { beginAtZero: true, max: 100 } }
+        }
+      });
+    }
+    
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      document.getElementById(tabName + 'Tab').classList.add('active');
+      event.target.classList.add('active');
+    }
+    
+    function exportChart() {
+      alert('📥 Export data dalam format CSV dan PDF akan diunduh');
+    }
+  </script>
+</body>
+</html>

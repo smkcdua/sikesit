@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics Perkembangan Siswa</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f6fa;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 30px;
+      border-radius: 12px;
+      color: white;
+      margin-bottom: 30px;
+    }
+    
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    
+    .header p {
+      opacity: 0.9;
+    }
+    
+    .controls-section {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      align-items: end;
+    }
+    
+    .control-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .control-group label {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    
+    .control-group select,
+    .control-group input {
+      padding: 10px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    
+    .control-group select:focus,
+    .control-group input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+    
+    button {
+      padding: 10px 16px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+      font-size: 14px;
+    }
+    
+    button:hover {
+      background: #764ba2;
+      transform: translateY(-2px);
+    }
+    
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .metric-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .metric-card h4 {
+      color: #7f8c8d;
+      font-size: 12px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    
+    .metric-value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 8px;
+    }
+    
+    .metric-change {
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .change-up {
+      color: #27ae60;
+    }
+    
+    .change-down {
+      color: #e74c3c;
+    }
+    
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .chart-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .chart-card h3 {
+      color: #2c3e50;
+      margin-bottom: 16px;
+      font-size: 16px;
+    }
+    
+    .chart-wrapper {
+      position: relative;
+      height: 350px;
+    }
+    
+    .detailed-table {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 24px;
+    }
+    
+    .table-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 20px;
+    }
+    
+    .table-header h3 {
+      font-size: 16px;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    th {
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #2c3e50;
+      border-bottom: 2px solid #e0e0e0;
+      font-size: 13px;
+    }
+    
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+    }
+    
+    tr:hover {
+      background: #f8f9fa;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .status-excellent {
+      background: #d1e7dd;
+      color: #0f5132;
+    }
+    
+    .status-good {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .status-average {
+      background: #ffeaea;
+      color: #842029;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      transition: width 0.3s;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      background: white;
+      border-radius: 12px;
+      color: #667eea;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .error-message {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 16px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      border-left: 4px solid #f5c6cb;
+    }
+    
+    .comparison-section {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .comparison-section h3 {
+      color: #2c3e50;
+      margin-bottom: 16px;
+    }
+    
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+    }
+    
+    .comparison-card {
+      padding: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .comparison-card h4 {
+      color: #667eea;
+      margin-bottom: 8px;
+    }
+    
+    .comparison-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 8px;
+    }
+    
+    .comparison-target {
+      font-size: 12px;
+      color: #7f8c8d;
+    }
+    
+    @media (max-width: 768px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .metrics-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .controls-section {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <div class="header">
+      <h1>📈 Analytics Perkembangan Siswa</h1>
+      <p>Pantau progres kebugaran dan kesehatan siswa dengan detail</p>
+    </div>
+    
+    <!-- ERROR MESSAGE -->
+    <div id="errorMessage" class="error-message" style="display: none;"></div>
+    
+    <!-- CONTROLS -->
+    <div class="controls-section">
+      <div class="control-group">
+        <label>📚 Kelas</label>
+        <select id="classSelect" onchange="loadAnalytics()">
+          <option value="">Pilih Kelas</option>
+          <option value="7A">Kelas 7A</option>
+          <option value="7B">Kelas 7B</option>
+          <option value="8A">Kelas 8A</option>
+        </select>
+      </div>
+      
+      <div class="control-group">
+        <label>👤 Siswa</label>
+        <select id="studentSelect" onchange="loadAnalytics()">
+          <option value="">Semua Siswa</option>
+        </select>
+      </div>
+      
+      <div class="control-group">
+        <label>📅 Periode</label>
+        <input type="month" id="monthSelect">
+      </div>
+      
+      <div class="control-group">
+        <label>📊 Metrik</label>
+        <select id="metricSelect">
+          <option value="all">Semua Metrik</option>
+          <option value="strength">Kekuatan</option>
+          <option value="cardio">Kardio</option>
+          <option value="speed">Kecepatan</option>
+          <option value="flexibility">Fleksibilitas</option>
+          <option value="body">Komposisi Tubuh</option>
+        </select>
+      </div>
+      
+      <div class="btn-group">
+        <button onclick="loadAnalytics()">🔄 Refresh</button>
+        <button onclick="exportData()">📥 Export</button>
+      </div>
+    </div>
+    
+    <!-- LOADING STATE -->
+    <div id="loadingState" class="loading" style="display: none;">
+      ⏳ Loading analytics...
+    </div>
+    
+    <!-- METRICS OVERVIEW -->
+    <div id="metricsContainer" class="metrics-grid" style="display: none;">
+      <div class="metric-card">
+        <h4>📊 Rata-rata Push-up</h4>
+        <div class="metric-value" id="metricPushup">-</div>
+        <div class="metric-change" id="metricPushupChange"></div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="pushupProgressFill" style="width: 0%"></div>
+        </div>
+      </div>
+      
+      <div class="metric-card">
+        <h4>📊 Rata-rata Sit-up</h4>
+        <div class="metric-value" id="metricSitup">-</div>
+        <div class="metric-change" id="metricSitupChange"></div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="situpProgressFill" style="width: 0%"></div>
+        </div>
+      </div>
+      
+      <div class="metric-card">
+        <h4>⏱️ Rata-rata Sprint 20m</h4>
+        <div class="metric-value" id="metricSprint">-</div>
+        <div class="metric-change" id="metricSprintChange"></div>
+      </div>
+      
+      <div class="metric-card">
+        <h4>📏 Rata-rata BMI</h4>
+        <div class="metric-value" id="metricBMI">-</div>
+        <div class="metric-change" id="metricBMIChange"></div>
+      </div>
+    </div>
+    
+    <!-- CHARTS -->
+    <div class="charts-grid" id="chartsContainer" style="display: none;">
+      <div class="chart-card">
+        <h3>📈 Tren Kekuatan (4 Minggu)</h3>
+        <div class="chart-wrapper">
+          <canvas id="strengthTrendChart"></canvas>
+        </div>
+      </div>
+      
+      <div class="chart-card">
+        <h3>⏱️ Tren Kecepatan (4 Minggu)</h3>
+        <div class="chart-wrapper">
+          <canvas id="speedTrendChart"></canvas>
+        </div>
+      </div>
+      
+      <div class="chart-card">
+        <h3>📊 Distribusi Kategori</h3>
+        <div class="chart-wrapper">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+      
+      <div class="chart-card">
+        <h3>💪 Perbandingan Metrik</h3>
+        <div class="chart-wrapper">
+          <canvas id="comparisonChart"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <!-- COMPARISON SECTION -->
+    <div id="comparisonContainer" class="comparison-section" style="display: none;">
+      <h3>🎯 Status vs Target</h3>
+      <div class="comparison-grid" id="comparisonGrid"></div>
+    </div>
+    
+    <!-- DETAILED TABLE -->
+    <div id="detailedTableContainer" class="detailed-table" style="display: none;">
+      <div class="table-header">
+        <h3>📋 Data Detail Siswa</h3>
+      </div>
+      <table id="detailedTable">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama Siswa</th>
+            <th>Push-up</th>
+            <th>Sit-up</th>
+            <th>Sprint 20m</th>
+            <th>BMI</th>
+            <th>Status</th>
+            <th>Progress</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <script>
+    const CONFIG = {
+      APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby42XPC3LxUrUJnbGA32ASxAc8fQ7QFcFedrxpisCC-CK3M-X6a_uaPzB7AZqRHv28F/exec',
+      SPREADSHEET_ID: '19GBSrxikpO2KUWonR4YihDGlFhLBSju7mz9zmrG8Q3A'
+    };
+    
+    let charts = {};
+    let allData = [];
+    
+    window.addEventListener('DOMContentLoaded', () => {
+      setCurrentMonth();
+      // Load mock data on page load
+      loadMockData();
+    });
+    
+    function setCurrentMonth() {
+      const today = new Date();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const year = today.getFullYear();
+      document.getElementById('monthSelect').value = `${year}-${month}`;
+    }
+    
+    async function loadAnalytics() {
+      const classSelect = document.getElementById('classSelect').value;
+      if (!classSelect) {
+        showError('Pilih kelas terlebih dahulu');
+        return;
+      }
+      
+      showLoading();
+      hideError();
+      
+      try {
+        // Try to fetch from API
+        const response = await fetch(CONFIG.APPS_SCRIPT_URL + '?action=getData&class=' + classSelect);
+        const result = await response.json();
+        
+        if (result.success) {
+          allData = result.data || [];
+        } else {
+          loadMockData();
+        }
+      } catch (error) {
+        console.log('Using mock data');
+        loadMockData();
+      } finally {
+        hideLoading();
+        populateStudentSelect();
+        applyFiltersAndRender();
+      }
+    }
+    
+    function loadMockData() {
+      allData = [
+        // Minggu 1
+        { studentName: 'Andi Pratama', class: '7A', week: 1, pushup: 20, situp: 28, sprint20: 3.92, beratBadan: 45.2, tinggiBadan: 159, bmi: 17.9 },
+        { studentName: 'Budi Santoso', class: '7A', week: 1, pushup: 25, situp: 35, sprint20: 3.80, beratBadan: 48.5, tinggiBadan: 162, bmi: 18.5 },
+        { studentName: 'Citra Dewi', class: '7A', week: 1, pushup: 15, situp: 30, sprint20: 4.10, beratBadan: 42.0, tinggiBadan: 155, bmi: 17.5 },
+        // Minggu 2
+        { studentName: 'Andi Pratama', class: '7A', week: 2, pushup: 25, situp: 30, sprint20: 3.85, beratBadan: 45.5, tinggiBadan: 159, bmi: 18.0 },
+        { studentName: 'Budi Santoso', class: '7A', week: 2, pushup: 28, situp: 38, sprint20: 3.75, beratBadan: 48.8, tinggiBadan: 162, bmi: 18.6 },
+        { studentName: 'Citra Dewi', class: '7A', week: 2, pushup: 18, situp: 32, sprint20: 4.05, beratBadan: 42.2, tinggiBadan: 155, bmi: 17.6 },
+        // Minggu 3
+        { studentName: 'Andi Pratama', class: '7A', week: 3, pushup: 28, situp: 33, sprint20: 3.80, beratBadan: 45.3, tinggiBadan: 159, bmi: 17.9 },
+        { studentName: 'Budi Santoso', class: '7A', week: 3, pushup: 30, situp: 40, sprint20: 3.70, beratBadan: 48.6, tinggiBadan: 162, bmi: 18.5 },
+        { studentName: 'Citra Dewi', class: '7A', week: 3, pushup: 20, situp: 35, sprint20: 4.00, beratBadan: 41.9, tinggiBadan: 155, bmi: 17.5 }
+      ];
+      
+      populateStudentSelect();
+      applyFiltersAndRender();
+    }
+    
+    function populateStudentSelect() {
+      const classSelect = document.getElementById('classSelect').value;
+      const students = [...new Set(
+        allData
+          .filter(d => !classSelect || d.class === classSelect)
+          .map(d => d.studentName)
+      )];
+      
+      const select = document.getElementById('studentSelect');
+      const currentValue = select.value;
+      
+      select.innerHTML = '<option value="">Semua Siswa</option>';
+      students.forEach(student => {
+        const option = document.createElement('option');
+        option.value = student;
+        option.textContent = student;
+        select.appendChild(option);
+      });
+      
+      select.value = currentValue;
+    }
+    
+    function applyFiltersAndRender() {
+      const classSelect = document.getElementById('classSelect').value;
+      const studentSelect = document.getElementById('studentSelect').value;
+      
+      let filtered = allData;
+      if (classSelect) filtered = filtered.filter(d => d.class === classSelect);
+      if (studentSelect) filtered = filtered.filter(d => d.studentName === studentSelect);
+      
+      renderMetrics(filtered);
+      renderCharts(filtered);
+      renderComparisonSection(filtered);
+      renderDetailedTable(filtered);
+      
+      document.getElementById('metricsContainer').style.display = 'grid';
+      document.getElementById('chartsContainer').style.display = 'grid';
+      document.getElementById('comparisonContainer').style.display = 'block';
+      document.getElementById('detailedTableContainer').style.display = 'block';
+    }
+    
+    function renderMetrics(data) {
+      const latestData = [];
+      data.forEach(d => {
+        const idx = latestData.findIndex(x => x.studentName === d.studentName);
+        if (idx === -1) latestData.push(d);
+        else if (d.week > latestData[idx].week) latestData[idx] = d;
+      });
+      
+      const avgPushup = (latestData.reduce((s, d) => s + (d.pushup || 0), 0) / latestData.length).toFixed(1);
+      const avgSitup = (latestData.reduce((s, d) => s + (d.situp || 0), 0) / latestData.length).toFixed(1);
+      const avgSprint = (latestData.reduce((s, d) => s + (d.sprint20 || 0), 0) / latestData.length).toFixed(2);
+      const avgBMI = (latestData.reduce((s, d) => s + (d.bmi || 0), 0) / latestData.length).toFixed(1);
+      
+      document.getElementById('metricPushup').textContent = Math.round(avgPushup);
+      document.getElementById('metricSitup').textContent = Math.round(avgSitup);
+      document.getElementById('metricSprint').textContent = avgSprint + 's';
+      document.getElementById('metricBMI').textContent = avgBMI;
+      
+      document.getElementById('pushupProgressFill').style.width = Math.min(avgPushup / 40 * 100, 100) + '%';
+      document.getElementById('situpProgressFill').style.width = Math.min(avgSitup / 50 * 100, 100) + '%';
+    }
+    
+    function renderCharts(data) {
+      renderStrengthTrendChart(data);
+      renderSpeedTrendChart(data);
+      renderCategoryChart(data);
+      renderComparisonChart(data);
+    }
+    
+    function renderStrengthTrendChart(data) {
+      const weeks = [...new Set(data.map(d => d.week))].sort();
+      const pushupAvg = weeks.map(w => {
+        const weekData = data.filter(d => d.week === w && d.pushup);
+        return weekData.length ? (weekData.reduce((s, d) => s + d.pushup, 0) / weekData.length).toFixed(1) : 0;
+      });
+      
+      const situpAvg = weeks.map(w => {
+        const weekData = data.filter(d => d.week === w && d.situp);
+        return weekData.length ? (weekData.reduce((s, d) => s + d.situp, 0) / weekData.length).toFixed(1) : 0;
+      });
+      
+      const ctx = document.getElementById('strengthTrendChart');
+      if (charts.strengthTrendChart) charts.strengthTrendChart.destroy();
+      charts.strengthTrendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: weeks.map(w => 'W' + w),
+          datasets: [
+            {
+              label: 'Push-up',
+              data: pushupAvg,
+              borderColor: '#667eea',
+              backgroundColor: 'rgba(102, 126, 234, 0.1)',
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: 'Sit-up',
+              data: situpAvg,
+              borderColor: '#764ba2',
+              backgroundColor: 'rgba(118, 75, 162, 0.1)',
+              tension: 0.4,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'top' } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+    
+    function renderSpeedTrendChart(data) {
+      const weeks = [...new Set(data.map(d => d.week))].sort();
+      const sprintAvg = weeks.map(w => {
+        const weekData = data.filter(d => d.week === w && d.sprint20);
+        return weekData.length ? (weekData.reduce((s, d) => s + d.sprint20, 0) / weekData.length).toFixed(2) : 0;
+      });
+      
+      const ctx = document.getElementById('speedTrendChart');
+      if (charts.speedTrendChart) charts.speedTrendChart.destroy();
+      charts.speedTrendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: weeks.map(w => 'W' + w),
+          datasets: [{
+            label: 'Sprint 20m (detik)',
+            data: sprintAvg,
+            borderColor: '#e74c3c',
+            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: false, reverse: true } }
+        }
+      });
+    }
+    
+    function renderCategoryChart(data) {
+      const latestData = [];
+      data.forEach(d => {
+        const idx = latestData.findIndex(x => x.studentName === d.studentName);
+        if (idx === -1) latestData.push(d);
+        else if (d.week > latestData[idx].week) latestData[idx] = d;
+      });
+      
+      const excellent = latestData.filter(d => (d.pushup || 0) >= 30).length;
+      const good = latestData.filter(d => (d.pushup || 0) >= 20 && (d.pushup || 0) < 30).length;
+      const average = latestData.filter(d => (d.pushup || 0) >= 10 && (d.pushup || 0) < 20).length;
+      const needsImprovement = latestData.filter(d => (d.pushup || 0) < 10).length;
+      
+      const ctx = document.getElementById('categoryChart');
+      if (charts.categoryChart) charts.categoryChart.destroy();
+      charts.categoryChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Excellent', 'Good', 'Average', 'Needs Help'],
+          datasets: [{
+            data: [excellent, good, average, needsImprovement],
+            backgroundColor: ['#27ae60', '#f39c12', '#e67e22', '#e74c3c']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+    }
+    
+    function renderComparisonChart(data) {
+      const latestData = [];
+      data.forEach(d => {
+        const idx = latestData.findIndex(x => x.studentName === d.studentName);
+        if (idx === -1) latestData.push(d);
+        else if (d.week > latestData[idx].week) latestData[idx] = d;
+      });
+      
+      const ctx = document.getElementById('comparisonChart');
+      if (charts.comparisonChart) charts.comparisonChart.destroy();
+      charts.comparisonChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: ['Push-up', 'Sit-up', 'Sprint', 'BMI', 'Weight'],
+          datasets: [{
+            label: 'Rata-rata Kelas',
+            data: [
+              (latestData.reduce((s, d) => s + (d.pushup || 0), 0) / latestData.length),
+              (latestData.reduce((s, d) => s + (d.situp || 0), 0) / latestData.length),
+              (latestData.reduce((s, d) => s + ((d.sprint20 || 0) * 10), 0) / latestData.length),
+              (latestData.reduce((s, d) => s + (d.bmi || 0), 0) / latestData.length) * 3,
+              (latestData.reduce((s, d) => s + (d.beratBadan || 0), 0) / latestData.length)
+            ],
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102, 126, 234, 0.2)'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: { r: { beginAtZero: true } }
+        }
+      });
+    }
+    
+    function renderComparisonSection(data) {
+      const latestData = [];
+      data.forEach(d => {
+        const idx = latestData.findIndex(x => x.studentName === d.studentName);
+        if (idx === -1) latestData.push(d);
+        else if (d.week > latestData[idx].week) latestData[idx] = d;
+      });
+      
+      const html = latestData.map(d => `
+        <div class="comparison-card">
+          <h4>${d.studentName}</h4>
+          <div class="comparison-value">${d.pushup || '-'}</div>
+          <div class="comparison-target">Push-up | Target: 30+</div>
+          <div style="font-size: 11px; color: #e74c3c; margin-top: 4px;">
+            ${d.pushup && d.pushup >= 30 ? '✓ Target Tercapai' : `${30 - (d.pushup || 0)} lagi`}
+          </div>
+        </div>
+      `).join('');
+      
+      document.getElementById('comparisonGrid').innerHTML = html;
+    }
+    
+    function renderDetailedTable(data) {
+      const latestData = [];
+      data.forEach(d => {
+        const idx = latestData.findIndex(x => x.studentName === d.studentName);
+        if (idx === -1) latestData.push(d);
+        else if (d.week > latestData[idx].week) latestData[idx] = d;
+      });
+      
+      latestData.sort((a, b) => (b.pushup || 0) - (a.pushup || 0));
+      
+      const html = latestData.map((d, i) => {
+        const status = d.pushup >= 30 ? 'status-excellent' : d.pushup >= 20 ? 'status-good' : 'status-average';
+        const statusText = d.pushup >= 30 ? 'Excellent' : d.pushup >= 20 ? 'Good' : 'Average';
+        const progress = d.pushup >= 30 ? '+5%' : '+12%';
+        
+        return `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${d.studentName}</td>
+            <td>${d.pushup || '-'}</td>
+            <td>${d.situp || '-'}</td>
+            <td>${d.sprint20 || '-'}</td>
+            <td>${d.bmi || '-'}</td>
+            <td><span class="status-badge ${status}">${statusText}</span></td>
+            <td><span style="color: #27ae60; font-weight: 600;">↑ ${progress}</span></td>
+          </tr>
+        `;
+      }).join('');
+      
+      document.getElementById('tableBody').innerHTML = html;
+    }
+    
+    function showLoading() {
+      document.getElementById('loadingState').style.display = 'block';
+    }
+    
+    function hideLoading() {
+      document.getElementById('loadingState').style.display = 'none';
+    }
+    
+    function showError(msg) {
+      document.getElementById('errorMessage').textContent = msg;
+      document.getElementById('errorMessage').style.display = 'block';
+    }
+    
+    function hideError() {
+      document.getElementById('errorMessage').style.display = 'none';
+    }
+    
+    function exportData() {
+      alert('📥 Export data dalam format CSV');
+    }
+  </script>
+</body>
+</html>

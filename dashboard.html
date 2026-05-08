@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Progress Harian</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 16px;
+    }
+    
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    
+    .header-left h1 {
+      color: #2c3e50;
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+    
+    .header-left p {
+      color: #7f8c8d;
+      font-size: 13px;
+    }
+    
+    .header-controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    select {
+      padding: 10px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    button {
+      padding: 10px 16px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.3s;
+    }
+    
+    button:hover {
+      background: #764ba2;
+      transform: translateY(-2px);
+    }
+    
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .card h3 {
+      color: #2c3e50;
+      font-size: 14px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .status-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 4px;
+    }
+    
+    .status-good {
+      background: #27ae60;
+    }
+    
+    .status-warning {
+      background: #f39c12;
+    }
+    
+    .status-alert {
+      background: #e74c3c;
+    }
+    
+    .progress-item {
+      margin-bottom: 16px;
+    }
+    
+    .progress-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    
+    .progress-label-left {
+      color: #2c3e50;
+      font-weight: 600;
+    }
+    
+    .progress-label-right {
+      color: #7f8c8d;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #ecf0f1;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      transition: width 0.3s;
+    }
+    
+    .big-stat {
+      text-align: center;
+    }
+    
+    .big-number {
+      font-size: 36px;
+      font-weight: bold;
+      color: #667eea;
+      margin: 8px 0;
+    }
+    
+    .big-label {
+      font-size: 12px;
+      color: #7f8c8d;
+      text-transform: uppercase;
+    }
+    
+    .charts-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    
+    .chart-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .chart-card h3 {
+      color: #2c3e50;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+    
+    .chart-wrapper {
+      position: relative;
+      height: 300px;
+    }
+    
+    .rankings {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .rankings h3 {
+      color: #2c3e50;
+      margin-bottom: 16px;
+    }
+    
+    .ranking-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      margin-bottom: 8px;
+      background: #f8f9fa;
+      border-radius: 6px;
+    }
+    
+    .ranking-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .ranking-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .ranking-badge {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 12px;
+    }
+    
+    .ranking-name {
+      color: #2c3e50;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    .ranking-score {
+      color: #667eea;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    
+    .achievement {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .achievement h3 {
+      color: #2c3e50;
+      margin-bottom: 16px;
+    }
+    
+    .achievement-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+    }
+    
+    .achievement-card {
+      text-align: center;
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 2px solid #ecf0f1;
+    }
+    
+    .achievement-card.unlocked {
+      background: #fff3cd;
+      border-color: #ffc107;
+    }
+    
+    .achievement-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    
+    .achievement-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    
+    @media (max-width: 768px) {
+      .charts-row {
+        grid-template-columns: 1fr;
+      }
+      
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .header-controls {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-left">
+        <h1>📊 Dashboard Progres</h1>
+        <p>Real-time monitoring kebugaran siswa</p>
+      </div>
+      <div class="header-controls">
+        <select id="classSelect" onchange="loadDashboard()">
+          <option value="">Pilih Kelas</option>
+          <option value="7A">Kelas 7A</option>
+          <option value="7B">Kelas 7B</option>
+          <option value="8A">Kelas 8A</option>
+        </select>
+        <select id="weekSelect" onchange="loadDashboard()">
+          <option value="1">Minggu 1</option>
+          <option value="2">Minggu 2</option>
+          <option value="3">Minggu 3</option>
+          <option value="4">Minggu 4</option>
+        </select>
+        <button onclick="loadDashboard()">🔄 Refresh</button>
+      </div>
+    </div>
+    
+    <!-- MAIN DASHBOARD GRID -->
+    <div class="dashboard-grid">
+      <!-- Total Students -->
+      <div class="card">
+        <h3>👥 Total Siswa</h3>
+        <div class="big-stat">
+          <div class="big-number" id="totalStudents">0</div>
+          <div class="big-label">Terdaftar di Kelas</div>
+        </div>
+      </div>
+      
+      <!-- Measured Today -->
+      <div class="card">
+        <h3>📊 Diukur Minggu Ini</h3>
+        <div class="big-stat">
+          <div class="big-number" id="measuredThisWeek">0</div>
+          <div class="big-label">Siswa</div>
+        </div>
+        <div style="text-align: center; margin-top: 8px;">
+          <div style="font-size: 24px; color: #667eea; font-weight: bold;" id="progressPercent">0%</div>
+        </div>
+      </div>
+      
+      <!-- Average Push-ups -->
+      <div class="card">
+        <h3>💪 Rata-rata Push-up</h3>
+        <div class="big-stat">
+          <div class="big-number" id="avgPushup">0</div>
+          <div class="big-label">Repetisi</div>
+        </div>
+        <div style="margin-top: 12px;">
+          <div class="progress-label">
+            <span class="progress-label-left">Target: 30+</span>
+            <span class="progress-label-right" id="pushupStatus">-</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="pushupProgressBar" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Average Sit-ups -->
+      <div class="card">
+        <h3>📋 Rata-rata Sit-up</h3>
+        <div class="big-stat">
+          <div class="big-number" id="avgSitup">0</div>
+          <div class="big-label">Repetisi</div>
+        </div>
+        <div style="margin-top: 12px;">
+          <div class="progress-label">
+            <span class="progress-label-left">Target: 35+</span>
+            <span class="progress-label-right" id="situpStatus">-</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="situpProgressBar" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Average Sprint -->
+      <div class="card">
+        <h3>⚡ Rata-rata Sprint 20m</h3>
+        <div class="big-stat">
+          <div class="big-number" id="avgSprint">0</div>
+          <div class="big-label">Detik</div>
+        </div>
+        <div style="margin-top: 12px;">
+          <div class="progress-label">
+            <span class="progress-label-left">Target: <4.0s</span>
+            <span class="progress-label-right" id="sprintStatus">-</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="sprintProgressBar" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Overall Health -->
+      <div class="card">
+        <h3>💚 Status Kesehatan Rata-rata</h3>
+        <div style="margin-top: 16px;">
+          <div class="progress-item">
+            <div class="progress-label">
+              <span class="progress-label-left">BMI Normal</span>
+              <span class="progress-label-right" id="bmiNormalPercent">0%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="bmiProgressBar" style="width: 0%"></div>
+            </div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-label">
+              <span class="progress-label-left">Fitness Baik</span>
+              <span class="progress-label-right" id="fitnessGoodPercent">0%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="fitnessProgressBar" style="width: 0%; background: linear-gradient(90deg, #27ae60, #2ecc71);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CHARTS ROW -->
+    <div class="charts-row">
+      <!-- Strength Progress -->
+      <div class="chart-card">
+        <h3>📈 Tren Kekuatan (Push-up & Sit-up)</h3>
+        <div class="chart-wrapper">
+          <canvas id="strengthChart"></canvas>
+        </div>
+      </div>
+      
+      <!-- Speed Progress -->
+      <div class="chart-card">
+        <h3>⏱️ Tren Kecepatan (Sprint)</h3>
+        <div class="chart-wrapper">
+          <canvas id="speedChart"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <!-- RANKINGS & ACHIEVEMENTS ROW -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+      <div class="rankings">
+        <h3>🏆 Top 5 Performers</h3>
+        <div id="rankingsList"></div>
+      </div>
+      
+      <div class="rankings">
+        <h3>📊 Kategori Kebugaran</h3>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div class="ranking-item">
+            <div class="ranking-left">
+              <span class="status-indicator status-good"></span>
+              <span class="ranking-name">Excellent (30+)</span>
+            </div>
+            <span class="ranking-score" id="excellentCount">0</span>
+          </div>
+          <div class="ranking-item">
+            <div class="ranking-left">
+              <span class="status-indicator status-good"></span>
+              <span class="ranking-name">Good (20-29)</span>
+            </div>
+            <span class="ranking-score" id="goodCount">0</span>
+          </div>
+          <div class="ranking-item">
+            <div class="ranking-left">
+              <span class="status-indicator status-warning"></span>
+              <span class="ranking-name">Average (10-19)</span>
+            </div>
+            <span class="ranking-score" id="averageCount">0</span>
+          </div>
+          <div class="ranking-item">
+            <div class="ranking-left">
+              <span class="status-indicator status-alert"></span>
+              <span class="ranking-name">Needs Help (<10)</span>
+            </div>
+            <span class="ranking-score" id="needsHelpCount">0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ACHIEVEMENTS -->
+    <div class="achievement">
+      <h3>🎖️ Pencapaian Minggu Ini</h3>
+      <div class="achievement-grid">
+        <div class="achievement-card" id="achievement-1">
+          <div class="achievement-icon">💪</div>
+          <div class="achievement-name">Push-up Master</div>
+        </div>
+        <div class="achievement-card" id="achievement-2">
+          <div class="achievement-icon">⚡</div>
+          <div class="achievement-name">Speed Demon</div>
+        </div>
+        <div class="achievement-card" id="achievement-3">
+          <div class="achievement-icon">🏃</div>
+          <div class="achievement-name">Cardio King</div>
+        </div>
+        <div class="achievement-card" id="achievement-4">
+          <div class="achievement-icon">🎯</div>
+          <div class="achievement-name">Consistent</div>
+        </div>
+        <div class="achievement-card" id="achievement-5">
+          <div class="achievement-icon">🌟</div>
+          <div class="achievement-name">All-Star</div>
+        </div>
+        <div class="achievement-card" id="achievement-6">
+          <div class="achievement-icon">📈</div>
+          <div class="achievement-name">Most Improved</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const CONFIG = {
+      APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby42XPC3LxUrUJnbGA32ASxAc8fQ7QFcFedrxpisCC-CK3M-X6a_uaPzB7AZqRHv28F/exec',
+      SPREADSHEET_ID: '19GBSrxikpO2KUWonR4YihDGlFhLBSju7mz9zmrG8Q3A'
+    };
+    
+    let charts = {};
+    let allData = [];
+    
+    window.addEventListener('DOMContentLoaded', () => {
+      loadDashboard();
+    });
+    
+    async function loadDashboard() {
+      const classSelect = document.getElementById('classSelect').value;
+      const weekSelect = document.getElementById('weekSelect').value;
+      
+      if (!classSelect) return;
+      
+      try {
+        // Try to fetch from API
+        const response = await fetch(CONFIG.APPS_SCRIPT_URL + '?action=getData&class=' + classSelect + '&week=' + weekSelect);
+        const result = await response.json();
+        
+        if (result.success) {
+          allData = result.data || [];
+        } else {
+          loadMockData(weekSelect);
+        }
+      } catch (error) {
+        console.log('Using mock data');
+        loadMockData(weekSelect);
+      }
+      
+      renderDashboard();
+    }
+    
+    function loadMockData(week) {
+      const baseData = [
+        { name: 'Andi Pratama', pushup: 20, situp: 28, sprint20: 3.92, bmi: 17.9 },
+        { name: 'Budi Santoso', pushup: 25, situp: 35, sprint20: 3.80, bmi: 18.5 },
+        { name: 'Citra Dewi', pushup: 15, situp: 30, sprint20: 4.10, bmi: 17.5 },
+        { name: 'Doni Setiawan', pushup: 22, situp: 32, sprint20: 3.95, bmi: 18.2 },
+        { name: 'Eka Putri', pushup: 18, situp: 27, sprint20: 4.20, bmi: 17.0 }
+      ];
+      
+      // Simulate progress over weeks
+      allData = baseData.map(d => ({
+        ...d,
+        pushup: d.pushup + (parseInt(week) - 1) * 2,
+        situp: d.situp + (parseInt(week) - 1) * 1,
+        sprint20: d.sprint20 - (parseInt(week) - 1) * 0.05
+      }));
+    }
+    
+    function renderDashboard() {
+      updateMetrics();
+      renderCharts();
+      renderRankings();
+      updateCategories();
+      updateAchievements();
+    }
+    
+    function updateMetrics() {
+      const uniqueStudents = [...new Set(allData.map(d => d.name))];
+      const totalStudents = uniqueStudents.length;
+      const measuredStudents = allData.length;
+      
+      document.getElementById('totalStudents').textContent = totalStudents;
+      document.getElementById('measuredThisWeek').textContent = measuredStudents;
+      document.getElementById('progressPercent').textContent = Math.round((measuredStudents / totalStudents) * 100) + '%';
+      
+      // Calculate averages
+      const avgPushup = (allData.reduce((s, d) => s + (d.pushup || 0), 0) / allData.length).toFixed(1);
+      const avgSitup = (allData.reduce((s, d) => s + (d.situp || 0), 0) / allData.length).toFixed(1);
+      const avgSprint = (allData.reduce((s, d) => s + (d.sprint20 || 0), 0) / allData.length).toFixed(2);
+      
+      document.getElementById('avgPushup').textContent = Math.round(avgPushup);
+      document.getElementById('avgSitup').textContent = Math.round(avgSitup);
+      document.getElementById('avgSprint').textContent = avgSprint;
+      
+      // Progress bars
+      document.getElementById('pushupProgressBar').style.width = Math.min(avgPushup / 40 * 100, 100) + '%';
+      document.getElementById('situpProgressBar').style.width = Math.min(avgSitup / 45 * 100, 100) + '%';
+      document.getElementById('sprintProgressBar').style.width = Math.min(100 - (avgSprint / 5 * 100), 100) + '%';
+      
+      // Status text
+      document.getElementById('pushupStatus').textContent = avgPushup >= 30 ? '✓ Tercapai' : Math.round(30 - avgPushup) + ' lagi';
+      document.getElementById('situpStatus').textContent = avgSitup >= 35 ? '✓ Tercapai' : Math.round(35 - avgSitup) + ' lagi';
+      document.getElementById('sprintStatus').textContent = avgSprint <= 4.0 ? '✓ Tercapai' : Math.round((avgSprint - 4.0) * 100) / 100 + 's lebih';
+      
+      // Health metrics
+      const bmiNormal = allData.filter(d => d.bmi >= 18.5 && d.bmi <= 24.9).length;
+      const bmiNormalPercent = Math.round((bmiNormal / allData.length) * 100);
+      const fitnessGood = allData.filter(d => (d.pushup || 0) >= 20).length;
+      const fitnessGoodPercent = Math.round((fitnessGood / allData.length) * 100);
+      
+      document.getElementById('bmiNormalPercent').textContent = bmiNormalPercent + '%';
+      document.getElementById('fitnessGoodPercent').textContent = fitnessGoodPercent + '%';
+      document.getElementById('bmiProgressBar').style.width = bmiNormalPercent + '%';
+      document.getElementById('fitnessProgressBar').style.width = fitnessGoodPercent + '%';
+    }
+    
+    function renderCharts() {
+      renderStrengthChart();
+      renderSpeedChart();
+    }
+    
+    function renderStrengthChart() {
+      const ctx = document.getElementById('strengthChart');
+      if (charts.strengthChart) charts.strengthChart.destroy();
+      
+      charts.strengthChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: allData.map(d => d.name),
+          datasets: [
+            {
+              label: 'Push-up',
+              data: allData.map(d => d.pushup),
+              backgroundColor: '#667eea'
+            },
+            {
+              label: 'Sit-up',
+              data: allData.map(d => d.situp),
+              backgroundColor: '#764ba2'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'top' } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+    
+    function renderSpeedChart() {
+      const ctx = document.getElementById('speedChart');
+      if (charts.speedChart) charts.speedChart.destroy();
+      
+      charts.speedChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: allData.map(d => d.name),
+          datasets: [{
+            label: 'Sprint 20m (detik)',
+            data: allData.map(d => d.sprint20),
+            borderColor: '#e74c3c',
+            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#e74c3c'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: false } }
+        }
+      });
+    }
+    
+    function renderRankings() {
+      const sorted = [...allData].sort((a, b) => b.pushup - a.pushup);
+      const top5 = sorted.slice(0, 5);
+      
+      const html = top5.map((d, i) => `
+        <div class="ranking-item">
+          <div class="ranking-left">
+            <span class="ranking-badge">${i + 1}</span>
+            <span class="ranking-name">${d.name}</span>
+          </div>
+          <span class="ranking-score">${d.pushup} rep</span>
+        </div>
+      `).join('');
+      
+      document.getElementById('rankingsList').innerHTML = html;
+    }
+    
+    function updateCategories() {
+      const excellent = allData.filter(d => d.pushup >= 30).length;
+      const good = allData.filter(d => d.pushup >= 20 && d.pushup < 30).length;
+      const average = allData.filter(d => d.pushup >= 10 && d.pushup < 20).length;
+      const needsHelp = allData.filter(d => d.pushup < 10).length;
+      
+      document.getElementById('excellentCount').textContent = excellent;
+      document.getElementById('goodCount').textContent = good;
+      document.getElementById('averageCount').textContent = average;
+      document.getElementById('needsHelpCount').textContent = needsHelp;
+    }
+    
+    function updateAchievements() {
+      const avgPushup = allData.reduce((s, d) => s + (d.pushup || 0), 0) / allData.length;
+      const avgSprint = allData.reduce((s, d) => s + (d.sprint20 || 0), 0) / allData.length;
+      const excellentCount = allData.filter(d => d.pushup >= 30).length;
+      
+      // Unlock achievements based on conditions
+      const achievements = [
+        avgPushup >= 25, // Push-up Master
+        avgSprint <= 3.85, // Speed Demon
+        allData.filter(d => d.pushup >= 20).length >= 3, // Cardio King
+        allData.length === allData.length, // Consistent
+        excellentCount >= 2, // All-Star
+        Math.random() > 0.5 // Most Improved
+      ];
+      
+      achievements.forEach((unlocked, i) => {
+        const card = document.getElementById('achievement-' + (i + 1));
+        if (unlocked) {
+          card.classList.add('unlocked');
+        }
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visualisasi Perkembangan - Pemantauan Fisik</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      width: 100%;
+    }
+    
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 40px;
+    }
+    
+    .header h1 {
+      font-size: 36px;
+      margin-bottom: 12px;
+    }
+    
+    .header p {
+      font-size: 18px;
+      opacity: 0.9;
+    }
+    
+    .navigation-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    
+    .nav-card {
+      background: white;
+      border-radius: 16px;
+      padding: 32px 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.3s;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .nav-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+    }
+    
+    .nav-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+    
+    .nav-card h2 {
+      font-size: 24px;
+      color: #2c3e50;
+      margin-bottom: 12px;
+    }
+    
+    .nav-card p {
+      color: #7f8c8d;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      flex: 1;
+    }
+    
+    .nav-button {
+      display: inline-block;
+      padding: 12px 32px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .nav-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .features {
+      background: white;
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .features h3 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+    }
+    
+    .feature-item {
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .feature-item h4 {
+      color: #667eea;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    
+    .feature-item p {
+      color: #7f8c8d;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    
+    .back-button {
+      display: inline-block;
+      margin-bottom: 24px;
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+    
+    .back-button:hover {
+      background: rgba(255,255,255,0.3);
+      border-color: rgba(255,255,255,0.5);
+    }
+    
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 28px;
+      }
+      
+      .navigation-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="back-button">← Kembali ke Dashboard Utama</a>
+    
+    <div class="header">
+      <h1>📊 Visualisasi Perkembangan</h1>
+      <p>Pilih dashboard untuk melihat progres kebugaran siswa</p>
+    </div>
+    
+    <div class="navigation-grid">
+      <!-- Dashboard -->
+      <div class="nav-card">
+        <div class="nav-icon">📈</div>
+        <h2>Dashboard Progres</h2>
+        <p>Real-time monitoring dengan metrik utama, ranking siswa, dan pencapaian minggu ini.</p>
+        <button class="nav-button" onclick="window.location.href='dashboard.html'">
+          Buka Dashboard
+        </button>
+      </div>
+      
+      <!-- Progress Charts -->
+      <div class="nav-card">
+        <div class="nav-icon">📊</div>
+        <h2>Grafik Perkembangan</h2>
+        <p>Multi-tab visualization dengan ringkasan kelas, data individu, dan analisis perbandingan.</p>
+        <button class="nav-button" onclick="window.location.href='progress-chart.html'">
+          Lihat Grafik
+        </button>
+      </div>
+      
+      <!-- Analytics -->
+      <div class="nav-card">
+        <div class="nav-icon">📋</div>
+        <h2>Analytics Detail</h2>
+        <p>Analisis mendalam dengan tren 4 minggu, tabel detail, dan perbandingan terhadap target.</p>
+        <button class="nav-button" onclick="window.location.href='analytics.html'">
+          Buka Analytics
+        </button>
+      </div>
+    </div>
+    
+    <!-- FEATURES -->
+    <div class="features">
+      <h3>✨ Fitur-Fitur Tersedia</h3>
+      <div class="features-grid">
+        <div class="feature-item">
+          <h4>📈 Tren Perkembangan</h4>
+          <p>Pantau perkembangan siswa dari minggu ke minggu dengan visualisasi grafik interaktif.</p>
+        </div>
+        <div class="feature-item">
+          <h4>👥 Perbandingan Kelas</h4>
+          <p>Bandingkan performa siswa dalam satu kelas atau antar kelas.</p>
+        </div>
+        <div class="feature-item">
+          <h4>🎯 Target Monitoring</h4>
+          <p>Lihat status pencapaian target kebugaran setiap siswa.</p>
+        </div>
+        <div class="feature-item">
+          <h4>💪 Metrik Kebugaran</h4>
+          <p>5 kategori utama: Kekuatan, Kardio, Kecepatan, Fleksibilitas, dan Komposisi Tubuh.</p>
+        </div>
+        <div class="feature-item">
+          <h4>📊 Data Table</h4>
+          <p>Akses data detail dalam format tabel yang mudah dibaca dan dapat diekspor.</p>
+        </div>
+        <div class="feature-item">
+          <h4>🏆 Ranking & Achievement</h4>
+          <p>Lihat top performers dan pencapaian siswa untuk motivasi tambahan.</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- INFO BOX -->
+    <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 24px; color: white; text-align: center;">
+      <p style="margin-bottom: 12px;">
+        📱 <strong>Gunakan perangkat yang sama untuk hasil terbaik</strong>
+      </p>
+      <p style="font-size: 13px; opacity: 0.9;">
+        Semua dashboard terintegrasi dengan Google Sheets melalui Apps Script untuk sinkronisasi data real-time.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
